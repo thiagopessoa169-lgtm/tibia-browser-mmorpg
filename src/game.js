@@ -57,11 +57,43 @@ class WorldScene extends Phaser.Scene {
       const bar=this.add.graphics().setDepth(npc.y+49);bar.fillStyle(0x26352b,.9).fillRoundedRect(npc.x-13,npc.y-17,26,4,2);bar.fillStyle(0x83bd79,1).fillRoundedRect(npc.x-12,npc.y-16,24,2,1);
     });
   }
+  updateRemotePlayer(data){
+    if(!data || !data.user_id || data.map_id !== "aetheria-village") return;
+    const x = Number(data.x), y = Number(data.y);
+    if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+    let remote = this.remotePlayers.get(data.user_id);
+    if(!remote){
+      const sprite = this.add.image(x,y,"player").setTint(0x91c9e8).setDepth(y+30);
+      const label = this.add.text(x,y-28,String(data.name || "Aventureiro"),{
+        fontFamily:"Arial",fontSize:"10px",color:"#d8efff",
+        stroke:"#142b3b",strokeThickness:3
+      }).setOrigin(.5).setDepth(y+50);
+      remote = {sprite,label};
+      this.remotePlayers.set(data.user_id,remote);
+    }
+    remote.sprite.setPosition(x,y).setDepth(y+30);
+    remote.label.setPosition(x,y-28).setText(String(data.name || "Aventureiro")).setDepth(y+50);
+  }
+  syncRemotePlayers(players){
+    const active = new Set();
+    (players || []).forEach((player) => {
+      if(!player?.user_id) return;
+      active.add(player.user_id);
+      this.updateRemotePlayer(player);
+    });
+    for(const [id,remote] of this.remotePlayers){
+      if(!active.has(id)){
+        remote.sprite.destroy();
+        remote.label.destroy();
+        this.remotePlayers.delete(id);
+      }
+    }
+  }
   update(){
     if(!this.player?.body)return;
     const left=this.cursors.left.isDown||this.keys.A.isDown,right=this.cursors.right.isDown||this.keys.D.isDown,up=this.cursors.up.isDown||this.keys.W.isDown,down=this.cursors.down.isDown||this.keys.S.isDown;
     const speed=this.keys.SHIFT.isDown?205:this.player.speed;let vx=(right?1:0)-(left?1:0),vy=(down?1:0)-(up?1:0),len=Math.hypot(vx,vy)||1;
-    vx=vx/len*speed;vy=vy/len*speed;this.player.setVelocity(vx,vy);this.player.setDepth(this.player.y+30);
+    vx=vx/len*speed;vy=vy/len*speed;this.player.setVelocity(vx,vy);this.player.setDepth(this.player.y+30);window.AetheriaBackend?.sendPosition({x:this.player.x,y:this.player.y});
     this.player.setAngle(vx<0?-4:vx>0?4:0);
   }
 }
