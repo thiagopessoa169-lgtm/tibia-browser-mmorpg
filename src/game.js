@@ -14,6 +14,17 @@ class WorldScene extends Phaser.Scene {
     this.physics.add.collider(this.player,this.villagers);
     this.add.text(18,18,"VILA DE AETHERIA",{fontFamily:"Georgia,serif",fontSize:"13px",color:"#e7e0b9",stroke:"#17251d",strokeThickness:4,letterSpacing:2}).setScrollFactor(0).setDepth(1000);
     this.add.text(18,39,"Uma nova jornada começa...",{fontFamily:"Arial",fontSize:"10px",color:"#c0d0b9",stroke:"#17251d",strokeThickness:3}).setScrollFactor(0).setDepth(1000);
+    this.remotePlayers = new Map();
+    window.AetheriaWorld = {
+      setLocalPosition: (x, y) => {
+        if (Number.isFinite(x) && Number.isFinite(y)) this.player.setPosition(
+          Phaser.Math.Clamp(x, 16, WORLD_W - 16),
+          Phaser.Math.Clamp(y, 16, WORLD_H - 16)
+        );
+      },
+      updateRemotePlayer: (data) => this.updateRemotePlayer(data),
+      syncRemotePlayers: (players) => this.syncRemotePlayers(players)
+    };
     this.physics.world.setFPS(60);
   }
   createTextures(){
