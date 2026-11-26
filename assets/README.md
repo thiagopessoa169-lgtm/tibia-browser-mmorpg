@@ -1,0 +1,1 @@
+Os sprites e texturas deste protótipo são desenhados proceduralmente em runtime usando Phaser Graphics. Não são necessários downloads de imagens externas.
