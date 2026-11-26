@@ -12,8 +12,35 @@
 <main id="app">
 <header class="topbar">
   <div class="brand"><span class="brand-mark">✦</span><div><strong>AETHERIA</strong><small>ONLINE · PROTÓTIPO</small></div></div>
-  <div class="world-status"><span class="status-dot"></span> Mundo local <span class="divider">|</span> Etapa 1</div>
+  <div class="world-status"><span class="status-dot"></span><span id="backend-status">Mundo local</span><span class="divider">|</span> Etapa 2</div>
 </header>
+<section class="account-area" aria-label="Conta e personagens">
+  <div id="auth-panel" class="account-panel">
+    <div class="panel-title">Portal de Aetheria</div>
+    <p class="panel-subtitle">Entre ou crie uma conta para guardar seu aventureiro.</p>
+    <form id="auth-form" class="auth-form">
+      <label>E-mail<input id="auth-email" type="email" autocomplete="email" required placeholder="voce@exemplo.com"></label>
+      <label>Senha<input id="auth-password" type="password" autocomplete="current-password" minlength="6" required placeholder="Mínimo de 6 caracteres"></label>
+      <label id="auth-name-wrap" hidden>Nome do aventureiro<input id="auth-name" type="text" maxlength="16" autocomplete="nickname" placeholder="Ex.: Aventureiro"></label>
+      <div class="auth-actions"><button id="auth-submit" type="submit">Entrar</button><button id="auth-mode-toggle" type="button" class="secondary">Criar uma conta</button></div>
+    </form>
+    <p id="auth-message" class="status-message" role="status">Carregando...</p>
+  </div>
+  <div id="character-panel" class="account-panel" hidden>
+    <div class="panel-title">Seus personagens</div>
+    <p id="character-message" class="status-message" role="status">Carregando personagens...</p>
+    <div id="character-list" class="character-list"></div>
+    <form id="character-form" class="character-form">
+      <label>Novo personagem<input id="character-name" type="text" maxlength="16" required placeholder="3 a 16 caracteres"></label>
+      <button id="create-character-submit" type="submit">Criar personagem</button>
+    </form>
+  </div>
+  <div id="account-bar" class="account-bar" hidden>
+    <strong id="account-label">Conta conectada</strong>
+    <span>Jogadores online: <b id="online-count">1</b></span>
+    <button id="logout-btn" type="button" class="secondary">Sair</button>
+  </div>
+</section>
 <section class="game-shell" aria-label="Jogo Aetheria Online">
   <div id="game"></div>
   <div class="hud">
@@ -27,5 +54,8 @@
 </section>
 <footer>Protótipo de desenvolvimento · Os dados ainda não são salvos nesta etapa.</footer>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="./src/supabase-config.js"></script>
+<script src="./src/backend.js"></script>
 <script src="./src/game.js"></script>
 </body></html>
