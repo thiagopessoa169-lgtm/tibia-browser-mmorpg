@@ -1,26 +1,36 @@
 # Aetheria Online — MMORPG 2D para navegador
 
-Protótipo da Etapa 1: vila top-down explorável, movimentação em oito direções, câmera suave, cenário procedural e HUD. Ainda é single-player; autenticação, salvamento e multiplayer serão implementados na Etapa 2.
+Protótipo de MMORPG 2D top-down. A Etapa 1 trouxe a vila explorável e a movimentação. A Etapa 2 está em implementação: autenticação, personagens persistentes e presença/movimento em tempo real com Supabase.
 
 ## Executar
+
 Abra `index.html` no navegador. Se necessário, na pasta do projeto execute `python -m http.server 8000` e acesse http://localhost:8000.
 
 **Controles:** WASD/setas para mover; Shift para correr.
 
-Sem build e sem dependências locais. Phaser 3.80.1 é carregado por CDN.
+Sem build e sem dependências locais. Phaser 3.80.1 e Supabase JS são carregados por CDN com versões fixadas.
+
+## Configuração online
+
+Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem URL/chave do Supabase, o protótipo permanece jogável em modo local. Não coloque chaves secret ou service_role no navegador.
 
 ## Estrutura
-- `index.html` — entrada do jogo
-- `src/game.js` — mapa, entidades, câmera e controles
+
+- `index.html` — entrada do jogo e interface de conta/personagens
+- `src/game.js` — mapa, câmera, controles e jogadores remotos
+- `src/backend.js` — autenticação, personagens, presença e sincronização
+- `src/supabase-config.js` — URL e chave publishable do projeto
 - `src/style.css` — interface responsiva
-- `docs/ROADMAP.md` — etapas planejadas
+- `supabase/migrations/` — SQL de tabelas e políticas RLS/Realtime
+- `docs/` — roadmap e guias de configuração
 - `netlify.toml` e `vercel.json` — hospedagem estática
 
 ## Roadmap
-1. Base jogável no navegador (esta entrega)
-2. Supabase Auth, PostgreSQL e Realtime
+
+1. Base jogável no navegador (aprovada)
+2. Supabase Auth, personagens, PostgreSQL e Realtime (em implementação)
 3. Combate, monstros, XP e PVP
 4. NPCs, quests, inventário e mapas
 5. Polimento, performance e deploy
 
-A escolha prevista para o backend é Supabase, com políticas RLS e variáveis de ambiente configuradas na Etapa 2.
+A Etapa 2 ainda precisa de um projeto Supabase configurado e de testes com duas contas em navegadores diferentes. A movimentação enviada pelo cliente ainda não é autoritativa no servidor.
