@@ -1,1 +1,26 @@
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 50% 0%,#29453b,#14231f 55%,#0e1715);color:#e9f0e9}body{padding:22px}#app{max-width:1200px;margin:auto}.topbar{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 16px}.brand{display:flex;gap:11px;align-items:center}.brand-mark{width:36px;height:36px;display:grid;place-items:center;border:1px solid #9eaa78;border-radius:10px;color:#d6dca1;background:#35483b;font-size:21px}.brand strong{display:block;letter-spacing:3px;font-size:14px}.brand small{display:block;color:#91a99b;font-size:9px;letter-spacing:2px;margin-top:2px}.world-status{font-size:12px;color:#b8c8bd}.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#8bd59d;box-shadow:0 0 10px #8bd59d;margin-right:7px}.divider{color:#53675d;margin:0 8px}.game-shell{position:relative;border:1px solid #526b5d;border-radius:15px;overflow:hidden;background:#192b25;box-shadow:0 24px 80px #0008,0 0 0 5px #ffffff08}#game{width:100%;aspect-ratio:16/9;min-height:380px;max-height:690px}#game canvas{display:block;width:100%!important;height:100%!important;image-rendering:pixelated}.hud{position:absolute;inset:16px 17px auto;display:flex;justify-content:space-between;pointer-events:none}.player-card,.location-card{background:#14211ddd;border:1px solid #82947b66;border-radius:10px;box-shadow:0 5px 18px #0005;backdrop-filter:blur(5px)}.player-card{display:flex;gap:10px;padding:9px 13px;align-items:center;min-width:205px}.avatar{width:35px;height:35px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(145deg,#d5c28b,#8d9b70);color:#28352a;font-weight:900}.player-info strong,.player-info span,.player-info small{display:block}.player-info strong{font-size:12px}.player-info span,.player-info small{font-size:9px;color:#aebeb0}.health-track{height:5px;width:130px;background:#34463b;border-radius:8px;margin:5px 0 3px;overflow:hidden}.health-track i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#75bd83,#b2d68e)}.location-card{padding:9px 13px;text-align:right}.location-card span,.location-card strong{display:block}.location-card span{font-size:8px;letter-spacing:1.5px;color:#9caf9f}.location-card strong{font-size:12px;margin-top:4px}.hint{position:absolute;bottom:13px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:7px 13px;border-radius:8px;background:#14211ddd;border:1px solid #82947b55;color:#d5e1d5;font-size:10px}.hint b{color:#a5c88e;margin:0 4px}footer{text-align:center;color:#81968a;font-size:11px;padding:15px}@media(max-width:600px){body{padding:8px}.topbar{padding:0 3px 12px}.world-status{font-size:10px}.game-shell{border-radius:9px}#game{min-height:320px;aspect-ratio:4/3}.hud{inset:8px}.player-card{min-width:0;padding:6px 8px}.avatar{width:27px;height:27px}.health-track{width:90px}.location-card{padding:7px 8px}.hint{font-size:9px;bottom:8px}}
+
+/* Etapa 2 — conta, personagens e estado de conexão */
+.account-area{margin:0 0 14px}
+.account-panel,.account-bar{background:#172923eF;border:1px solid #657b68;border-radius:12px;padding:14px 16px;box-shadow:0 10px 30px #0003}
+.panel-title{font-family:Georgia,serif;font-size:17px;letter-spacing:.8px;color:#e7d9aa}
+.panel-subtitle,.status-message{font-size:12px;color:#b6c7b8;margin:6px 0 10px}
+.status-message[data-type="error"]{color:#ffaaa0}
+.status-message[data-type="success"]{color:#a9e1a8}
+.status-message[data-type="warning"]{color:#e5d49a}
+.auth-form,.character-form{display:flex;align-items:end;gap:10px;flex-wrap:wrap}
+.auth-form label,.character-form label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#b9c9b9;min-width:190px}
+.auth-form input,.character-form input{height:35px;border:1px solid #607667;border-radius:7px;background:#0e1c17;color:#edf4ed;padding:0 10px;outline:none}
+.auth-form input:focus,.character-form input:focus{border-color:#b4c98e;box-shadow:0 0 0 2px #b4c98e22}
+.auth-actions{display:flex;gap:8px}
+.account-panel button,.account-bar button{border:1px solid #9aab7e;border-radius:7px;background:#9eae79;color:#1c2b20;font-weight:700;padding:9px 13px;cursor:pointer}
+.account-panel button.secondary,.account-bar button.secondary{background:#263d31;color:#dbe8d9;border-color:#627968}
+.account-panel button:disabled{opacity:.45;cursor:not-allowed}
+.account-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:12px;color:#c9d8ca}
+.account-bar strong{color:#f0e7c9}
+.account-bar span{color:#aebfae}
+.character-list{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.character-choice{display:flex;flex-direction:column;align-items:flex-start;min-width:150px;text-align:left}
+.character-choice span{font-size:10px;font-weight:400;margin-top:3px}
+[hidden]{display:none!important}
+@media(max-width:600px){.account-panel{padding:11px}.auth-form,.character-form{align-items:stretch;flex-direction:column}.auth-form label,.character-form label{min-width:0}.auth-actions{flex-wrap:wrap}.account-bar{gap:9px}}
