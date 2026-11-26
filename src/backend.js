@@ -174,6 +174,8 @@
     if (window.AetheriaWorld?.setLocalPosition) {
       window.AetheriaWorld.setLocalPosition(character.x, character.y);
     }
+    $("player-name").textContent = character.name;
+    $("player-level").textContent = "Nível " + character.level + " · Aventureiro";
     await connectWorld();
   }
 
