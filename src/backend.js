@@ -122,7 +122,6 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "character-choice";
-        button.innerHTML = "";
         const title = document.createElement("strong");
         title.textContent = character.name;
         const detail = document.createElement("span");
@@ -145,15 +144,10 @@
     }
     const button = $("create-character-submit");
     button.disabled = true;
+    // O banco preenche level, HP, posição e mapa pelos valores padrão.
     const { data, error } = await state.client.from("characters").insert({
       user_id: state.user.id,
-      name,
-      level: 1,
-      hp: 100,
-      max_hp: 100,
-      x: 1168,
-      y: 784,
-      map_id: "aetheria-village"
+      name
     }).select("id,name,level,hp,max_hp,x,y,map_id").single();
     button.disabled = false;
     if (error) {
