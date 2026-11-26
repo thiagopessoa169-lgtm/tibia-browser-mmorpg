@@ -9,6 +9,25 @@ class WorldScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player,true,.085,.085); this.cameras.main.setZoom(1.25);
     this.cursors=this.input.keyboard.createCursorKeys();
     this.keys=this.input.keyboard.addKeys("W,A,S,D,SHIFT");
+
+    // Não deixe o Phaser capturar teclas enquanto o usuário preenche formulários.
+    const isTextField = (element) => Boolean(element?.closest?.(
+      'input, textarea, select, [contenteditable="true"]'
+    ));
+    const updateKeyboardFocus = () => {
+      if (this.input.keyboard) {
+        this.input.keyboard.enabled = !isTextField(document.activeElement);
+      }
+    };
+    document.addEventListener("focusin", updateKeyboardFocus);
+    document.addEventListener("focusout", () => {
+      requestAnimationFrame(updateKeyboardFocus);
+    });
+    window.addEventListener("blur", () => {
+      if (this.input.keyboard) this.input.keyboard.enabled = false;
+    });
+    window.addEventListener("focus", updateKeyboardFocus);
+    updateKeyboardFocus();
     this.physics.world.setBounds(0,0,WORLD_W,WORLD_H);
     this.physics.add.collider(this.player,this.obstacles);
     this.physics.add.collider(this.player,this.villagers);
