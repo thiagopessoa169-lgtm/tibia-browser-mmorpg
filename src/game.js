@@ -8,7 +8,15 @@ class WorldScene extends Phaser.Scene {
     this.cameras.main.setBounds(0,0,WORLD_W,WORLD_H);
     this.cameras.main.startFollow(this.player,true,.085,.085); this.cameras.main.setZoom(1.25);
     this.cursors=this.input.keyboard.createCursorKeys();
-    this.keys=this.input.keyboard.addKeys("W,A,S,D,SHIFT");
+    // addKeys captura W/A/S/D por padrão e pode impedir que inputs recebam essas letras.
+    // Desabilitamos a captura padrão para que o navegador processe a digitação normalmente.
+    this.keys=this.input.keyboard.addKeys("W,A,S,D,SHIFT", false);
+    this.input.keyboard.removeCapture([
+      Phaser.Input.Keyboard.KeyCodes.W,
+      Phaser.Input.Keyboard.KeyCodes.A,
+      Phaser.Input.Keyboard.KeyCodes.S,
+      Phaser.Input.Keyboard.KeyCodes.D
+    ]);
 
     // Não deixe o Phaser capturar teclas enquanto o usuário preenche formulários.
     const isTextField = (element) => Boolean(element?.closest?.(
