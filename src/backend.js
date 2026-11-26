@@ -165,6 +165,10 @@
     $("character-panel").hidden = true;
     $("account-bar").hidden = false;
     $("account-label").textContent = character.name + " · " + state.user.email;
+    state.lastX = Number(character.x);
+    state.lastY = Number(character.y);
+    state.lastPersistAt = 0;
+    state.lastBroadcastAt = 0;
     if (window.AetheriaWorld?.setLocalPosition) {
       window.AetheriaWorld.setLocalPosition(character.x, character.y);
     }
@@ -228,6 +232,34 @@
     $("online-count").textContent = String(players.length + 1);
   }
 
+  async function persistPosition(position) {
+    if (!state.client || !state.character || !position) return false;
+    const x = Math.round(Number(position.x));
+    const y = Math.round(Number(position.y));
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+    const { error } = await state.client.from("characters").update({
+      x, y, updated_at: new Date().toISOString()
+    }).eq("id", state.character.id);
+    if (error) {
+      console.warn("Falha ao salvar posição:", error.message);
+      return false;
+    }
+    state.lastPersistAt = Date.now();
+    return true;
+  }
+
+  function currentPosition() {
+    return window.AetheriaWorld?.getLocalPosition?.() ||
+      (state.lastX !== null && state.lastY !== null
+        ? { x: state.lastX, y: state.lastY } : null);
+  }
+
+  async function saveCurrentPosition() {
+    const position = currentPosition();
+    if (!position || !state.character) return false;
+    return persistPosition(position);
+  }
+
   async function sendPosition(position) {
     if (!state.character || !state.channel || !state.connected) return;
     const now = Date.now();
@@ -248,21 +280,14 @@
       sent_at: now
     };
     state.channel.send({ type: "broadcast", event: "position", payload });
-
-    if (now - state.lastPersistAt >= 3000) {
-      state.lastPersistAt = now;
-      state.client.from("characters").update({
-        x: payload.x,
-        y: payload.y,
-        updated_at: new Date().toISOString()
-      }).eq("id", state.character.id).then(({ error }) => {
-        if (error) console.warn("Falha ao salvar posição:", error.message);
-      });
-      state.channel.track(payload);
+    if (now - state.lastPersistAt >= 1000) {
+      await persistPosition(payload);
+      state.channel?.track(payload);
     }
   }
 
   async function logout() {
+    await saveCurrentPosition();
     if (state.channel) await state.client.removeChannel(state.channel);
     await state.client.auth.signOut();
     state.user = null;
@@ -287,6 +312,10 @@
     $("auth-mode-toggle").addEventListener("click", () => setMode(state.mode === "login" ? "register" : "login"));
     $("character-form").addEventListener("submit", createCharacter);
     $("logout-btn").addEventListener("click", logout);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") saveCurrentPosition();
+    });
+    window.addEventListener("pagehide", () => saveCurrentPosition());
     setMode("login");
 
     state.client.auth.getSession().then(({ data, error }) => {
@@ -306,6 +335,6 @@
     });
   }
 
-  window.AetheriaBackend = { sendPosition, isOnline: () => state.connected };
+  window.AetheriaBackend = { sendPosition, saveCurrentPosition, isOnline: () => state.connected };
   document.addEventListener("DOMContentLoaded", init);
 })();
