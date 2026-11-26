@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#172b27">
+<meta name="description" content="Aetheria Online — protótipo MMORPG 2D para navegador.">
+<title>Aetheria Online</title>
+<link rel="stylesheet" href="./src/style.css">
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+</head>
+<body>
+<main id="app">
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">✦</span><div><strong>AETHERIA</strong><small>ONLINE · PROTÓTIPO</small></div></div>
+  <div class="world-status"><span class="status-dot"></span> Mundo local <span class="divider">|</span> Etapa 1</div>
+</header>
+<section class="game-shell" aria-label="Jogo Aetheria Online">
+  <div id="game"></div>
+  <div class="hud">
+    <div class="player-card"><div class="avatar">A</div><div class="player-info">
+      <strong>Viajante</strong><span>Nível 1 · Aventureiro</span>
+      <div class="health-track"><i></i></div><small>100 / 100 HP</small>
+    </div></div>
+    <div class="location-card"><span>LOCALIZAÇÃO</span><strong>Vila de Aetheria</strong></div>
+  </div>
+  <div class="hint">WASD / Setas — mover <b>·</b> Shift — correr</div>
+</section>
+<footer>Protótipo de desenvolvimento · Os dados ainda não são salvos nesta etapa.</footer>
+</main>
+<script src="./src/game.js"></script>
+</body></html>
