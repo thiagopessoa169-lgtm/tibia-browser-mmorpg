@@ -22,6 +22,7 @@ class WorldScene extends Phaser.Scene {
           Phaser.Math.Clamp(y, 16, WORLD_H - 16)
         );
       },
+      getLocalPosition: () => ({ x: this.player.x, y: this.player.y }),
       updateRemotePlayer: (data) => this.updateRemotePlayer(data),
       syncRemotePlayers: (players) => this.syncRemotePlayers(players)
     };
@@ -91,6 +92,9 @@ class WorldScene extends Phaser.Scene {
   }
   update(){
     if(!this.player?.body)return;
+    const active=document.activeElement;
+    const typing=active && (active.matches("input,textarea,select") || active.isContentEditable);
+    if(typing){this.player.setVelocity(0,0);return;}
     const left=this.cursors.left.isDown||this.keys.A.isDown,right=this.cursors.right.isDown||this.keys.D.isDown,up=this.cursors.up.isDown||this.keys.W.isDown,down=this.cursors.down.isDown||this.keys.S.isDown;
     const speed=this.keys.SHIFT.isDown?205:this.player.speed;let vx=(right?1:0)-(left?1:0),vy=(down?1:0)-(up?1:0),len=Math.hypot(vx,vy)||1;
     vx=vx/len*speed;vy=vy/len*speed;this.player.setVelocity(vx,vy);this.player.setDepth(this.player.y+30);window.AetheriaBackend?.sendPosition({x:this.player.x,y:this.player.y});
