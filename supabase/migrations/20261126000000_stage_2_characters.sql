@@ -25,7 +25,9 @@ create index if not exists characters_user_id_idx
 
 alter table public.characters enable row level security;
 
-grant select, insert, update, delete on public.characters to authenticated;
+grant select on public.characters to authenticated;
+grant insert (user_id, name) on public.characters to authenticated;
+grant update (x, y, updated_at) on public.characters to authenticated;
 
 drop policy if exists "Players can read their own characters" on public.characters;
 create policy "Players can read their own characters"
@@ -42,11 +44,6 @@ create policy "Players can update their own characters"
   on public.characters for update to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
-
-drop policy if exists "Players can delete their own characters" on public.characters;
-create policy "Players can delete their own characters"
-  on public.characters for delete to authenticated
-  using ((select auth.uid()) = user_id);
 
 -- Canal privado compartilhado: somente usuários autenticados podem entrar,
 -- receber presença e enviar atualizações de posição.
