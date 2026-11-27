@@ -2,7 +2,7 @@
 
 ## Status
 
-**Planejamento aprovado pelo usuário em 2026-11-27.** As subetapas 4.1 e 4.2 foram aprovadas. A subetapa 4.3 está implementada e publicada para validação; a 4.4 ainda não foi iniciada.
+**Planejamento aprovado pelo usuário em 2026-11-27.** As subetapas 4.1, 4.2 e 4.3 foram aprovadas. A subetapa 4.4 está em implementação.
 
 ## Objetivo
 
@@ -46,7 +46,7 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 ### 4.3 — Inventário e equipamentos
 
-**Status: implementação publicada, aguardando validação do usuário.**
+**Status: aprovada pelo usuário.**
 
 - [x] Bolsa visual com capacidade indicada de 20 itens e quantidades empilháveis.
 - [x] Itens iniciais: ervas medicinais, essências e equipamentos de vestimenta/acessório.
@@ -58,11 +58,13 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 ### 4.4 — Expansão do mundo
 
-- Novas regiões exploráveis.
-- Portais e transições entre mapas.
-- Novos monstros e pontos de surgimento.
-- Novos NPCs e áreas de missões.
-- Carregamento eficiente para manter desempenho do jogo.
+**Status: em implementação.**
+
+- [x] Nova região explorável: Bosque Antigo.
+- [x] Portais de ida e volta com persistência de região e posição.
+- [x] Criaturas e NPC próprios da nova região.
+- [ ] Testes de transição, reconexão, multiplayer e regressão.
+- [ ] Publicação e validação do usuário.
 
 ## Critérios de aceitação
 
