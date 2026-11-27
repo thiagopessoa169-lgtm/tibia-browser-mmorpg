@@ -32,6 +32,6 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 2. Supabase Auth, personagens, PostgreSQL e Realtime (aprovada)
 3. Combate, monstros, XP e PvP (aprovada)
 4. NPCs, missões, inventário e expansão do mundo (aprovada)
-5. Polimento visual (5.1 aprovada); performance, experiência do jogador e revisão final ainda pendentes
+5. Polimento visual (5.1 aprovada); 5.2 performance e estabilidade em andamento; experiência do jogador e revisão final ainda pendentes
 
 A Etapa 2 foi validada com duas contas e movimentação multiplayer funcional. Consulte [o plano da Etapa 3](docs/ETAPA-3-PLANO.md) para escopo, decisões técnicas e critérios de aceitação.
