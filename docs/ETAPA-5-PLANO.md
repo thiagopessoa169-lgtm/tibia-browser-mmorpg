@@ -1,7 +1,7 @@
 # Etapa 5 — Polimento visual, performance e deploy
 
 ## Status geral
-**Planejamento aprovado pelo usuário em 2026-11-27.** As subetapas 5.1, 5.2 e 5.3 foram implementadas, publicadas e aprovadas pelo usuário. A subetapa 5.4 — Revisão e deploy — está em andamento.
+**Planejamento aprovado pelo usuário em 2026-11-27.** As subetapas 5.1, 5.2 e 5.3 foram implementadas, publicadas e aprovadas. A subetapa 5.4 — Revisão e deploy — está em andamento e aguarda teste do usuário.
 
 ## Objetivo
 Refinar a apresentação e a experiência de Aetheria Online, preservar as funções aprovadas e revisar a publicação, integração Supabase, permissões e acesso.
@@ -44,30 +44,42 @@ Implementado e publicado:
 O usuário testou e aprovou a subetapa.
 
 ## 5.4 — Revisão e deploy
-**Status: em andamento.**
+**Status: em andamento — correção de progressão publicada para teste.**
 
-### Verificações concluídas em 2026-11-27
-- Vercel: projeto localizado; deployment de produção mais recente em estado `READY`, ligado à branch `main` e ao commit `ad179ba99a693a250376debb936db45deee6b30d`.
-- Domínio principal `https://tibia-browser-mmorpg.vercel.app` e aliases de produção associados ao deployment.
-- Proteção por senha, SSO e lista de IPs confiáveis desativadas no projeto, permitindo acesso público.
+### Auditoria inicial
+- Vercel: deployment anterior de produção em estado `READY`; domínio público sem proteção por senha, SSO ou restrição de IP.
 - Supabase: projeto `ACTIVE_HEALTHY`, PostgreSQL 17.12.
-- Nove migrações registradas no banco.
-- Três Edge Functions ativas: `arena-attack`, `quest-action` e `inventory-action`, todas com verificação JWT habilitada.
-- RLS habilitada nas tabelas revisadas. Tabelas de inventário, missões e cooldowns não concedem acesso direto a `anon` ou `authenticated`; o acesso é feito pelas funções de servidor com `service_role`.
-- As políticas de `characters` restringem leitura, criação e atualização à conta proprietária.
-- Advisors de desempenho e saúde sem apontamentos; consulta agregada de erros de runtime da Vercel sem erros nas últimas 24 horas.
+- A auditoria inicial identificou que `authenticated` podia atualizar diretamente `level`, `hp`, `max_hp` e `xp` na tabela `characters`.
+- A proteção contra senhas comprometidas continua desativada no Supabase Auth e permanece como melhoria pendente.
+- Tabelas internas sem políticas RLS específicas são intencionais quando não concedem privilégios diretos a `anon` ou `authenticated`; o padrão é negar acesso direto, com operações mediadas por Edge Functions.
 
-### Pontos de atenção identificados
-- O advisor do Supabase informa que a proteção contra senhas comprometidas está desativada. É uma melhoria recomendada para a configuração de Auth.
-- A tabela `characters` ainda concede ao papel `authenticated` atualização direta de `level`, `hp`, `max_hp` e `xp`. O cliente atualmente persiste esses campos diretamente em `src/backend.js`; portanto, um usuário pode alterar a progressão do próprio personagem fora do fluxo normal do jogo. O isolamento entre contas continua aplicado por RLS, mas a integridade antitrapaça desses campos não está garantida.
-- A posição/mapa também são enviados pelo cliente, limitação já conhecida do protótipo. A validação de PvP e das ações de missão reduz alguns abusos, mas não substitui uma simulação autoritativa no servidor.
-- As tabelas de inventário/missões sem políticas RLS próprias são intencionais no desenho atual: não há privilégios diretos para usuários autenticados, e as operações passam pelas Edge Functions.
+### Correção de progressão implementada em 2026-11-27
+- Migração `20261127204141_secure_character_progression` aplicada e registrada.
+- Revogados de `authenticated` os privilégios de atualização direta de `level`, `hp`, `max_hp` e `xp`; o cliente mantém atualização apenas de posição, mapa e data de atualização.
+- Criada a tabela privada `character_combat_cooldowns`, com RLS habilitada e acesso somente para `service_role`.
+- Criadas funções SQL `apply_monster_reward`, `apply_monster_damage` e `respawn_character`, em modo `SECURITY INVOKER`, com execução somente para `service_role`.
+- Nova Edge Function `progress-action` publicada e ativa, com verificação JWT habilitada. Ela valida a sessão e a propriedade do personagem, determina as recompensas/danos no servidor e aplica cooldowns por surgimento.
+- `src/backend.js` agora chama a Edge Function para recompensas, dano e renascimento; não grava mais os campos de progressão diretamente.
+- `src/game.js` aplica os valores confirmados pelo servidor. O modo local sem conta continua usando progressão local.
+- As recompensas de missões continuam usando a rotina de servidor já existente.
 
-### Próximos passos
-- Decidir e implementar uma migração da gravação de progressão para validação no servidor antes de declarar a integridade da progressão protegida.
-- Avaliar a ativação da proteção contra senhas comprometidas no Supabase Auth.
-- Fazer um teste final do domínio público em outro computador/rede, incluindo login, seleção de personagem, troca de região, inventário e persistência.
-- Revalidar o deployment de produção e então submeter a 5.4 à aprovação do usuário.
+### Verificações técnicas após a correção
+- Banco registra 10 migrações.
+- Quatro Edge Functions ativas: `arena-attack`, `quest-action`, `inventory-action` e `progress-action`; todas com verificação JWT habilitada.
+- Consulta de privilégios confirmou que `authenticated` não tem UPDATE em `level`, `hp`, `max_hp` ou `xp`.
+- A tabela de cooldowns não concede privilégios a `anon` ou `authenticated`.
+- As três funções SQL novas não são executáveis por `authenticated`; apenas `service_role` tem EXECUTE.
+- As funções SQL novas usam `SECURITY INVOKER`, não `SECURITY DEFINER`.
+
+### Limitação conhecida
+O cálculo de XP/nível, o HP persistido e o renascimento agora são controlados pelo servidor, e os eventos de recompensa têm validação de região/posição persistida e cooldown. Porém, a movimentação e a simulação de combate ainda ocorrem no cliente; como a posição também é enviada pelo navegador, isso não equivale a um sistema antitrapaça totalmente autoritativo. Uma simulação completa no servidor exigiria uma etapa arquitetural maior.
+
+### Pendências para concluir 5.4
+- Publicar e confirmar o novo deployment Vercel após os commits da correção.
+- Testar no jogo: derrotar monstros na Vila e no Bosque, receber XP, subir de nível, receber dano, morrer/renascer, completar a missão de caça e verificar persistência após sair e entrar novamente.
+- Testar login e troca de região no domínio público, preferencialmente em outro computador/rede.
+- Avaliar a proteção contra senhas comprometidas no Auth. A documentação do Supabase informa que esse recurso depende do plano Pro ou superior; não foi alterado nesta correção.
+- Após os testes, submeter a 5.4 à aprovação do usuário.
 
 ## Regra de avanço
-Cada subetapa será implementada, publicada para teste, validada pelo usuário e só então marcada como aprovada. Não declarar a Etapa 5 concluída enquanto os pontos de atenção da revisão final não estiverem resolvidos ou explicitamente aceitos como limitações do protótipo.
+Cada subetapa será implementada, publicada para teste, validada pelo usuário e só então marcada como aprovada. Não declarar a Etapa 5 concluída enquanto os testes finais não forem aprovados ou as limitações restantes não forem explicitamente aceitas.
