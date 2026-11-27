@@ -7,6 +7,7 @@
     user: null,
     character: null,
     channel: null,
+    progressChannel: null,
     connected: false,
     lastBroadcastAt: 0,
     lastPersistAt: 0,
@@ -201,6 +202,7 @@
   async function connectWorld() {
     if (!state.client || !state.user || !state.character) return;
     if (state.channel) await state.client.removeChannel(state.channel);
+    if (state.progressChannel) await state.client.removeChannel(state.progressChannel);
     const topic = "aetheria:world";
     const channel = state.client.channel(topic, {
       config: {
@@ -217,19 +219,6 @@
       .on("broadcast", { event: "position" }, ({ payload }) => {
         if (!payload || payload.user_id === state.user.id) return;
         window.AetheriaWorld?.updateRemotePlayer?.(payload);
-      })
-      .on("postgres_changes", {
-        event: "UPDATE",
-        schema: "public",
-        table: "characters",
-        filter: "id=eq." + state.character.id
-      }, ({ new: row }) => {
-        if (!row || row.id !== state.character?.id) return;
-        const hp = Number(row.hp);
-        if (Number.isFinite(hp)) {
-          window.AetheriaWorld?.applyServerHp?.(hp);
-          state.character = { ...state.character, hp };
-        }
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
@@ -253,6 +242,29 @@
         }
       });
     state.channel = channel;
+
+    // Canal público separado para mudanças Postgres do próprio personagem.
+    // A política RLS da tabela continua limitando a leitura ao dono da linha.
+    const progressChannel = state.client.channel("aetheria:character:" + state.character.id)
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "characters",
+        filter: "id=eq." + state.character.id
+      }, ({ new: row }) => {
+        if (!row || row.id !== state.character?.id) return;
+        const hp = Number(row.hp);
+        if (Number.isFinite(hp)) {
+          window.AetheriaWorld?.applyServerHp?.(hp);
+          state.character = { ...state.character, hp };
+        }
+      })
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.warn("[Aetheria] Falha ao receber atualização de HP:", status);
+        }
+      });
+    state.progressChannel = progressChannel;
   }
 
   function syncPresence(channel) {
@@ -402,6 +414,9 @@
     await flushProgress();
     await saveCurrentPosition();
     if (state.channel) await state.client.removeChannel(state.channel);
+    if (state.progressChannel) await state.client.removeChannel(state.progressChannel);
+    state.channel = null;
+    state.progressChannel = null;
     await state.client.auth.signOut();
     state.user = null;
     state.character = null;
