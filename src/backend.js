@@ -15,6 +15,7 @@
     progressSaveTimer: null,
     pendingProgress: null,
     progressSaving: false,
+    progressSavePromise: null,
     mode: "login"
   };
 
@@ -277,10 +278,12 @@
       clearTimeout(state.progressSaveTimer);
       state.progressSaveTimer = null;
     }
-    if (state.progressSaving || !state.pendingProgress) return false;
+    if (state.progressSavePromise) return state.progressSavePromise;
+    if (!state.pendingProgress || !state.client || !state.user || !state.character) return false;
+
     state.progressSaving = true;
-    let saved = true;
-    try {
+    state.progressSavePromise = (async () => {
+      let saved = true;
       while (state.pendingProgress) {
         const progress = state.pendingProgress;
         state.pendingProgress = null;
@@ -301,13 +304,18 @@
         }
         state.character = { ...state.character, ...progress };
       }
+      return saved;
+    })();
+
+    try {
+      return await state.progressSavePromise;
     } finally {
       state.progressSaving = false;
+      state.progressSavePromise = null;
       if (state.pendingProgress && !state.progressSaveTimer) {
         state.progressSaveTimer = setTimeout(() => flushProgress(), 900);
       }
     }
-    return saved;
   }
 
   function saveProgress(progress, options = {}) {
