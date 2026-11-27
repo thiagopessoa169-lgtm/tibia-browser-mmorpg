@@ -9,7 +9,6 @@
     channel: null,
     connected: false,
     lastBroadcastAt: 0,
-    lastTrackAt: 0,
     lastPersistAt: 0,
     lastX: null,
     lastY: null,
@@ -170,7 +169,6 @@
     state.lastY = Number(character.y);
     state.lastPersistAt = 0;
     state.lastBroadcastAt = 0;
-    state.lastTrackAt = 0;
     if (window.AetheriaWorld?.setLocalPosition) {
       window.AetheriaWorld.setLocalPosition(character.x, character.y);
     }
@@ -187,7 +185,7 @@
       config: {
         private: true,
         presence: { key: state.user.id },
-        broadcast: { self: false, ack: false }
+        broadcast: { self: false, ack: true }
       }
     });
 
@@ -271,7 +269,7 @@
     const x = Number(position.x), y = Number(position.y);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     const moved = state.lastX === null || Math.abs(x - state.lastX) + Math.abs(y - state.lastY) >= 1;
-    if (!moved || now - state.lastBroadcastAt < 80) return;
+    if (!moved || now - state.lastBroadcastAt < 160) return;
     state.lastBroadcastAt = now;
     state.lastX = x;
     state.lastY = y;
@@ -280,11 +278,6 @@
       const result = await state.channel.send({ type: "broadcast", event: "position", payload });
       if (result !== "ok" && result?.status !== "ok") console.warn("[Aetheria] Broadcast de posição não confirmado:", result);
     } catch (error) { console.warn("[Aetheria] Erro ao transmitir posição:", error); }
-    if (now - state.lastTrackAt >= 400) {
-      state.lastTrackAt = now;
-      try { await state.channel.track(payload); }
-      catch (error) { console.warn("[Aetheria] Erro ao atualizar presença:", error); }
-    }
     if (now - state.lastPersistAt >= 1000) {
       state.lastPersistAt = now;
       persistPosition(payload).catch((error) => console.warn("[Aetheria] Erro ao salvar posição:", error));
