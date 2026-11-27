@@ -155,7 +155,7 @@
     const { data, error } = await state.client.from("characters").insert({
       user_id: state.user.id,
       name
-    }).select("id,name,level,hp,max_hp,x,y,map_id").single();
+    }).select("id,name,level,hp,max_hp,xp,x,y,map_id").single();
     button.disabled = false;
     if (error) {
       message($("character-message"), error.code === "23505"
