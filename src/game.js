@@ -56,6 +56,7 @@ class WorldScene extends Phaser.Scene {
     this.add.text(18,39,this.mapId==="bosque-antigo"?"Uma floresta esquecida...":"Uma nova jornada começa...",{fontFamily:"Arial",fontSize:"10px",color:"#c0d0b9",stroke:"#17251d",strokeThickness:3}).setScrollFactor(0).setDepth(1000);
     this.remotePlayers = new Map();
     this.locationLabel = document.querySelector(".location-card strong");
+    if(this.locationLabel)this.locationLabel.textContent=this.mapId==="bosque-antigo"?"Bosque Antigo":"Vila de Aetheria";
     this.dialoguePanel=document.getElementById("npc-dialogue");
     this.dialogueTitle=document.getElementById("npc-dialogue-title");
     this.dialogueText=document.getElementById("npc-dialogue-text");
@@ -76,7 +77,10 @@ class WorldScene extends Phaser.Scene {
           Phaser.Math.Clamp(y, 16, WORLD_H - 16)
         );
       },
-      loadMap: (mapId,x,y) => {const nextMap=mapId==="bosque-antigo"?"bosque-antigo":"aetheria-village";if(nextMap===this.mapId){this.player.setPosition(Phaser.Math.Clamp(x,16,WORLD_W-16),Phaser.Math.Clamp(y,16,WORLD_H-16));return;}this.scene.restart({mapId:nextMap,x,y});
+      loadMap: (mapId,x,y,progress) => {
+        const nextMap=mapId==="bosque-antigo"?"bosque-antigo":"aetheria-village";
+        if(nextMap===this.mapId){this.player.setPosition(Phaser.Math.Clamp(x,16,WORLD_W-16),Phaser.Math.Clamp(y,16,WORLD_H-16));return;}
+        this.scene.restart({mapId:nextMap,x,y,progress});
       },
       getLocalPosition: () => ({ x: this.player.x, y: this.player.y }),
       updateRemotePlayer: (data) => this.updateRemotePlayer(data),
@@ -104,6 +108,7 @@ class WorldScene extends Phaser.Scene {
       }
     };
     this.physics.world.setFPS(60);
+    if(data.progress)window.AetheriaWorld?.loadProgress?.(data.progress);
   }
   createTextures(){
     const g=this.make.graphics({x:0,y:0,add:false});
@@ -324,9 +329,8 @@ class WorldScene extends Phaser.Scene {
   }
   createPortals(){const data=this.mapId==="bosque-antigo"?{x:5*TILE+16,y:24*TILE+16,target:"aetheria-village",targetX:66*TILE+16,targetY:24*TILE+16,label:"Portal para a Vila"}:{x:67*TILE+16,y:24*TILE+16,target:"bosque-antigo",targetX:6*TILE+16,targetY:24*TILE+16,label:"Portal para o Bosque"};const ring=this.add.circle(data.x,data.y,22,0x78b7c4,.18).setStrokeStyle(4,0x9de2d9,.95).setDepth(data.y+20);const core=this.add.circle(data.x,data.y,12,0x9de2d9,.3).setStrokeStyle(2,0xd6fff1,.9).setDepth(data.y+21);this.tweens.add({targets:[ring,core],alpha:.45,duration:900,yoyo:true,repeat:-1});const label=this.add.text(data.x,data.y-38,data.label,{fontFamily:"Arial",fontSize:"10px",color:"#e0fff2",stroke:"#18352e",strokeThickness:4}).setOrigin(.5).setDepth(data.y+30);this.portal={...data,ring,core,label};this.portalHint=this.add.text(data.x,data.y+38,"E · viajar",{fontFamily:"Arial",fontSize:"10px",color:"#fff0b0",stroke:"#263523",strokeThickness:3}).setOrigin(.5).setDepth(data.y+31).setVisible(false);}
   findNearbyPortal(){if(!this.portal)return false;const near=Phaser.Math.Distance.Between(this.player.x,this.player.y,this.portal.x,this.portal.y)<58;this.portalHint?.setVisible(near&&!this.mapTransitioning&&!this.dialogueOpen&&!this.inventoryOpen);return near?this.portal:null;}
-  async transitionMap(){const portal=this.findNearbyPortal();if(!portal||this.mapTransitioning)return;this.mapTransitioning=true;this.player.setVelocity(0,0);this.showCombatMessage("Atravessando o portal...");const result=await window.AetheriaBackend?.changeMap?.(portal.target,portal.targetX,portal.targetY);if(!result?.ok){this.mapTransitioning=false;this.showCombatMessage(result?.message||"Não foi possível viajar agora.");return;}this.scene.restart({mapId:portal.target,x:portal.targetX,y:portal.targetY});}
+  async transitionMap(){const portal=this.findNearbyPortal();if(!portal||this.mapTransitioning)return;this.mapTransitioning=true;this.player.setVelocity(0,0);this.showCombatMessage("Atravessando o portal...");const result=await window.AetheriaBackend?.changeMap?.(portal.target,portal.targetX,portal.targetY);if(!result?.ok){this.mapTransitioning=false;this.showCombatMessage(result?.message||"Não foi possível viajar agora.");return;}this.scene.restart({mapId:portal.target,x:portal.targetX,y:portal.targetY,progress:{level:this.playerLevel,hp:this.playerHp,max_hp:this.playerMaxHp,xp:this.playerXp}});}
   isInArena(x,y){if(this.mapId!=="aetheria-village")return false;
-    if(this.mapId!=="aetheria-village")return false;
     return x>=31*TILE+16 && x<=42*TILE+16
       && y>=35*TILE+16 && y<=43*TILE+16;
   }
@@ -423,6 +427,12 @@ class WorldScene extends Phaser.Scene {
       this.time.delayedCall(2200,()=>{
         this.player.setPosition(36*TILE+16,24*TILE+16).clearTint();
         this.playerHp=this.playerMaxHp;this.playerRespawning=false;
+        if(this.mapId!=="aetheria-village"){
+          Promise.resolve(window.AetheriaBackend?.changeMap?.("aetheria-village",36*TILE+16,24*TILE+16)).then(result=>{
+            if(result?.ok)this.scene.restart({mapId:"aetheria-village",x:36*TILE+16,y:24*TILE+16,progress:{level:this.playerLevel,hp:this.playerHp,max_hp:this.playerMaxHp,xp:this.playerXp}});
+          });
+          return;
+        }
         this.updatePlayerHud();
         window.AetheriaBackend?.saveProgress?.({
           level: this.playerLevel, hp: this.playerHp,
