@@ -88,7 +88,7 @@ Deno.serve(async (req: Request) => {
     if (mapId !== "ruinas-elyndor") return json({ok:false,message:"O chefe só pode ser localizado nas Ruínas de Elyndor."},403,origin);
     const state = await admin.rpc("elyndor_boss_get_state");
     if (state.error) return json({ok:false,message:"Não foi possível consultar o chefe."},500,origin);
-    return json({ok:true,boss:state.data},200,origin);
+    return json({ok:true,boss:state.data,character:{level:character.level,xp:character.xp,hp:character.hp,max_hp:character.max_hp}},200,origin);
   }
   if (action === "boss_hit") {
     const result = await admin.rpc("elyndor_boss_hit",{p_character_id:characterId});
