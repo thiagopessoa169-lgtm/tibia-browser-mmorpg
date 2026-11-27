@@ -183,9 +183,13 @@ class WorldScene extends Phaser.Scene {
   }
   updatePlayerHud(){
     const fill=document.querySelector(".health-track i");
-    const hpText=document.querySelector(".player-info small");
+    const hpText=document.querySelector("#player-hp-text");
+    const xpFill=document.querySelector("#player-xp-fill");
+    const xpText=document.querySelector("#player-xp-text");
     if(fill)fill.style.width=(this.playerHp/this.playerMaxHp*100)+"%";
     if(hpText)hpText.textContent=this.playerHp+" / "+this.playerMaxHp+" HP";
+    if(xpFill)xpFill.style.width=(this.playerXp/(this.playerLevel*100)*100)+"%";
+    if(xpText)xpText.textContent=this.playerXp+" / "+(this.playerLevel*100)+" XP";
   }
   showCombatMessage(message){
     const hint=document.querySelector(".hint");
@@ -280,10 +284,10 @@ class WorldScene extends Phaser.Scene {
       remote.label.setPosition(nextX, nextY - 28).setDepth(nextY + 50);
     }
     if(!this.player?.body)return;
-    this.updateMonsters(time);
     const active=document.activeElement;
     const typing=active && (active.matches("input,textarea,select") || active.isContentEditable);
     if(typing){this.player.setVelocity(0,0);return;}
+    this.updateMonsters(time);
     this.attackNearbyMonster(time);
     const left=this.cursors.left.isDown||this.keys.A.isDown,right=this.cursors.right.isDown||this.keys.D.isDown,up=this.cursors.up.isDown||this.keys.W.isDown,down=this.cursors.down.isDown||this.keys.S.isDown;
     const speed=this.keys.SHIFT.isDown?205:this.player.speed;let vx=(right?1:0)-(left?1:0),vy=(down?1:0)-(up?1:0),len=Math.hypot(vx,vy)||1;
