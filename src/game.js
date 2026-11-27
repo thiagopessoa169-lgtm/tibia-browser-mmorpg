@@ -10,7 +10,7 @@ class WorldScene extends Phaser.Scene {
     this.cursors=this.input.keyboard.createCursorKeys();
     // addKeys captura W/A/S/D por padrão e pode impedir que inputs recebam essas letras.
     // Desabilitamos a captura padrão para que o navegador processe a digitação normalmente.
-    this.keys=this.input.keyboard.addKeys("W,A,S,D,SHIFT,SPACE", false);
+    this.keys=this.input.keyboard.addKeys("W,A,S,D,SHIFT,SPACE,E,ESC", false);
     this.attackCooldownAt = 0;
     this.playerHp = 100;
     this.playerMaxHp = 100;
@@ -53,6 +53,13 @@ class WorldScene extends Phaser.Scene {
     this.add.text(18,39,"Uma nova jornada começa...",{fontFamily:"Arial",fontSize:"10px",color:"#c0d0b9",stroke:"#17251d",strokeThickness:3}).setScrollFactor(0).setDepth(1000);
     this.remotePlayers = new Map();
     this.locationLabel = document.querySelector(".location-card strong");
+    this.dialoguePanel=document.getElementById("npc-dialogue");
+    this.dialogueTitle=document.getElementById("npc-dialogue-title");
+    this.dialogueText=document.getElementById("npc-dialogue-text");
+    this.dialogueOpen=false;
+    const dialogueClose=document.getElementById("npc-dialogue-close");
+    if(dialogueClose)dialogueClose.addEventListener("click",()=>this.closeNpcDialog());
+    if(this.dialoguePanel)this.dialoguePanel.hidden=true;
     this.wasInArena = false;
     window.AetheriaWorld = {
       setLocalPosition: (x, y) => {
@@ -114,11 +121,58 @@ class WorldScene extends Phaser.Scene {
   createPlayer(){this.player=this.physics.add.sprite(36*TILE+16,24*TILE+16,"player");this.player.setDepth(this.player.y+30).setCollideWorldBounds(true);this.player.body.setSize(17,17).setOffset(7,12);this.player.speed=145}
   createVillagers(){
     this.villagers=this.physics.add.staticGroup();
-    [[33,22,"Mira"],[40,26,"Ferreiro"],[31,27,"Guarda"]].forEach(([x,y,name])=>{
-      const npc=this.villagers.create(x*TILE+16,y*TILE+16,"villager");npc.setDepth(npc.y+20);npc.refreshBody();
-      this.add.text(npc.x,npc.y-28,name,{fontFamily:"Arial",fontSize:"10px",color:"#fff2c9",stroke:"#26352b",strokeThickness:3}).setOrigin(.5).setDepth(npc.y+50);
-      const bar=this.add.graphics().setDepth(npc.y+49);bar.fillStyle(0x26352b,.9).fillRoundedRect(npc.x-13,npc.y-17,26,4,2);bar.fillStyle(0x83bd79,1).fillRoundedRect(npc.x-12,npc.y-16,24,2,1);
+    const characters=[
+      {x:33,y:22,name:"Mira",role:"Guia de Aetheria",dialogue:"Bem-vindo à Vila de Aetheria, viajante!\n\nEste lugar é um refúgio para aventureiros. Explore os arredores, enfrente os Lodos da Floresta e fortaleça seu personagem.\n\nQuando quiser testar suas habilidades contra outros jogadores, procure a Arena de Aetheria, ao sul. Aqui na vila, você está em segurança."},
+      {x:40,y:26,name:"Ferreiro",role:"Mestre das ferramentas",dialogue:"Saudações! Trabalho com ferramentas e equipamentos para quem se aventura além das muralhas.\n\nAinda estou organizando minha oficina. Em breve, poderemos conversar sobre armas, armaduras e melhorias."},
+      {x:31,y:27,name:"Guarda",role:"Sentinela da vila",dialogue:"Atenção, aventureiro! A vila é uma zona segura.\n\nOs duelos entre jogadores são permitidos somente dentro da Arena de Aetheria, ao sul. Fique atento aos seus arredores e mantenha sua vida em dia."}
+    ];
+    characters.forEach((data)=>{
+      const npc=this.villagers.create(data.x*TILE+16,data.y*TILE+16,"villager");
+      npc.setDepth(npc.y+20);npc.refreshBody();
+      npc.npcData=data;
+      npc.nameLabel=this.add.text(npc.x,npc.y-28,data.name,{
+        fontFamily:"Arial",fontSize:"10px",color:"#fff2c9",
+        stroke:"#26352b",strokeThickness:3
+      }).setOrigin(.5).setDepth(npc.y+50);
+      npc.interactionHint=this.add.text(npc.x,npc.y-43,"E · conversar",{
+        fontFamily:"Arial",fontSize:"9px",color:"#d7e9ad",
+        stroke:"#26352b",strokeThickness:3
+      }).setOrigin(.5).setDepth(npc.y+51).setVisible(false);
     });
+  }
+  findNearbyNpc(){
+    let nearest=null,distanceLimit=62;
+    this.villagers.getChildren().forEach((npc)=>{
+      if(!npc.active || !npc.npcData)return;
+      const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,npc.x,npc.y);
+      if(distance<distanceLimit){distanceLimit=distance;nearest=npc;}
+    });
+    this.villagers.getChildren().forEach((npc)=>{
+      if(npc.interactionHint)npc.interactionHint.setVisible(npc===nearest && !this.dialogueOpen);
+    });
+    return nearest;
+  }
+  openNpcDialog(npc){
+    if(!npc?.npcData)return;
+    this.dialogueOpen=true;
+    const data=npc.npcData;
+    if(this.dialogueTitle)this.dialogueTitle.textContent=data.name+" · "+data.role;
+    if(this.dialogueText)this.dialogueText.textContent=data.dialogue;
+    if(this.dialoguePanel)this.dialoguePanel.hidden=false;
+    this.player.setVelocity(0,0);
+    this.villagers.getChildren().forEach((villager)=>{
+      if(villager.interactionHint)villager.interactionHint.setVisible(false);
+    });
+  }
+  closeNpcDialog(){
+    this.dialogueOpen=false;
+    if(this.dialoguePanel)this.dialoguePanel.hidden=true;
+  }
+  interactWithNpc(){
+    const npc=this.findNearbyNpc();
+    if(npc){this.openNpcDialog(npc);return true;}
+    this.showCombatMessage("Nenhum NPC por perto.");
+    return false;
   }
   createMonsters(){
     this.monsters = this.physics.add.group();
@@ -287,7 +341,7 @@ class WorldScene extends Phaser.Scene {
     this.time.delayedCall(1300,()=>{
       if(messageObject.active) messageObject.destroy();
       if(this.combatMessage===messageObject) this.combatMessage=null;
-      hint.textContent="WASD / Setas — mover · Shift — correr · Espaço — atacar";
+      hint.textContent="WASD / Setas — mover · Shift — correr · E — conversar · Espaço — atacar";
     });
   }
   updateMonsters(time){
@@ -377,6 +431,17 @@ class WorldScene extends Phaser.Scene {
     const active=document.activeElement;
     const typing=active && (active.matches("input,textarea,select") || active.isContentEditable);
     if(typing || this.playerRespawning){this.player.setVelocity(0,0);return;}
+    if(this.dialogueOpen){
+      this.player.setVelocity(0,0);
+      if(Phaser.Input.Keyboard.JustDown(this.keys.E) || Phaser.Input.Keyboard.JustDown(this.keys.ESC)){
+        this.closeNpcDialog();
+      }
+      return;
+    }
+    if(Phaser.Input.Keyboard.JustDown(this.keys.E)){
+      if(this.interactWithNpc())return;
+    }
+    this.findNearbyNpc();
     const inArena=this.isInArena(this.player.x,this.player.y);
     if(inArena!==this.wasInArena){
       this.wasInArena=inArena;
