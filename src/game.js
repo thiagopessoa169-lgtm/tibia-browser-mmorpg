@@ -46,7 +46,8 @@ class WorldScene extends Phaser.Scene {
     this.physics.world.setBounds(0,0,WORLD_W,WORLD_H);
     this.physics.add.collider(this.player,this.obstacles);
     this.physics.add.collider(this.player,this.villagers);
-    this.physics.add.collider(this.player,this.monsters);
+    // Monstros não bloqueiam fisicamente o jogador: evita prendê-lo quando cercado.
+    this.physics.add.overlap(this.player,this.monsters);
     this.physics.add.collider(this.monsters,this.obstacles);
     this.add.text(18,18,"VILA DE AETHERIA",{fontFamily:"Georgia,serif",fontSize:"13px",color:"#e7e0b9",stroke:"#17251d",strokeThickness:4,letterSpacing:2}).setScrollFactor(0).setDepth(1000);
     this.add.text(18,39,"Uma nova jornada começa...",{fontFamily:"Arial",fontSize:"10px",color:"#c0d0b9",stroke:"#17251d",strokeThickness:3}).setScrollFactor(0).setDepth(1000);
@@ -195,13 +196,20 @@ class WorldScene extends Phaser.Scene {
     const hint=document.querySelector(".hint");
     if(!hint)return;
     hint.textContent=message;
-    if(this.combatMessage)this.combatMessage.remove(false);
-    this.combatMessage=this.add.text(480,485,message,{
+    // Cada mensagem controla apenas o próprio objeto, sem callbacks antigos
+    // apagarem uma mensagem mais recente.
+    if(this.combatMessage){
+      this.combatMessage.destroy();
+      this.combatMessage=null;
+    }
+    const messageObject=this.add.text(480,485,message,{
       fontFamily:"Arial",fontSize:"13px",color:"#f3e8bd",stroke:"#17251d",strokeThickness:4,
       backgroundColor:"#14211ddd",padding:{x:10,y:6}
     }).setOrigin(.5).setScrollFactor(0).setDepth(1200);
+    this.combatMessage=messageObject;
     this.time.delayedCall(1300,()=>{
-      if(this.combatMessage){this.combatMessage.destroy();this.combatMessage=null;}
+      if(messageObject.active) messageObject.destroy();
+      if(this.combatMessage===messageObject) this.combatMessage=null;
       hint.textContent="WASD / Setas — mover · Shift — correr · Espaço — atacar";
     });
   }
