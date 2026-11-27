@@ -133,7 +133,7 @@ class WorldScene extends Phaser.Scene {
     g.clear();g.fillStyle(0x4b5554,1);g.fillRoundedRect(2,8,28,22,3);g.fillStyle(0x777d70,1);g.fillRect(5,5,22,8);g.fillStyle(0x343e3d,1);g.fillRect(9,15,14,15);g.generateTexture("ruin-wall",TILE,TILE);
     g.clear();g.fillStyle(0x244d55,.8);g.fillTriangle(16,2,29,27,3,27);g.fillStyle(0x78c8c0,1);g.fillTriangle(16,5,24,24,8,24);g.fillStyle(0xd1f5cb,.9);g.fillTriangle(16,9,19,21,13,21);g.generateTexture("ruin-crystal",TILE,TILE);
     g.clear();g.fillStyle(0x59636a,1);g.fillCircle(16,17,13);g.fillStyle(0x929b9b,1);g.fillCircle(16,13,9);g.fillStyle(0x283e43,1);g.fillCircle(12,14,2);g.fillCircle(20,14,2);g.fillStyle(0x9fe1d2,1);g.fillCircle(12,14,1);g.fillCircle(20,14,1);g.generateTexture("stone-sentinel",TILE,TILE);
-    g.clear();g.fillStyle(0x364f68,.75);g.fillEllipse(16,18,22,26);g.fillStyle(0x8fc8d8,.9);g.fillEllipse(16,14,12,17);g.fillStyle(0xd7f6ef,1);g.fillCircle(12,14,2);g.fillCircle(20,14,2);g.generateTexture("rune-wisp",TILE,TILE);
+    g.clear();g.fillStyle(0x202d32,1);g.fillEllipse(32,43,56,43);g.fillStyle(0x66777a,1);g.fillRoundedRect(9,12,46,42,10);g.fillStyle(0x9da9a2,1);g.fillRoundedRect(15,4,34,29,9);g.fillStyle(0x263b40,1);g.fillTriangle(17,10,7,0,20,4);g.fillTriangle(47,10,57,0,44,4);g.fillStyle(0x91e2d8,1);g.fillCircle(24,17,4);g.fillCircle(40,17,4);g.fillStyle(0xd9fff0,1);g.fillCircle(24,17,1.5);g.fillCircle(40,17,1.5);g.fillStyle(0x3c5557,1);g.fillRect(18,34,28,7);g.fillStyle(0x82928b,1);g.fillRect(11,49,13,14);g.fillRect(40,49,13,14);g.generateTexture("elyndor-guardian",64,64);
     g.destroy();
   }
   drawWorld(){
@@ -326,6 +326,7 @@ class WorldScene extends Phaser.Scene {
       {x:24*TILE+16,y:13*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:48*TILE+16,y:14*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:13*TILE+16,y:29*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:60*TILE+16,y:30*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true}
     ];
     this.monsterSpawns.forEach((spawn,index)=>this.spawnMonster(spawn,index));
+    if(this.mapId==="ruinas-elyndor")this.createRegionalBoss();
   }
   spawnMonster(spawn,index){
     const monster=this.monsters.create(spawn.x,spawn.y,spawn.texture||"slime");
@@ -341,6 +342,89 @@ class WorldScene extends Phaser.Scene {
     monster.hpBar=this.add.graphics().setDepth(monster.y+49);
     this.drawMonsterBar(monster);
     return monster;
+  }
+  createRegionalBoss(){
+    const x=36*TILE+16,y=24*TILE+16;
+    this.regionalBoss={x,y,hp:2400,maxHp:2400,phase:1,defeated:false,nextAttackAt:0,attackPending:false,syncAt:0};
+    const boss=this.add.image(x,y,"elyndor-guardian").setScale(1.55).setDepth(y+35);
+    boss.setTint(0xc5d6ce);
+    this.regionalBoss.sprite=boss;
+    this.regionalBoss.aura=this.add.circle(x,y,48,0x4aa69e,.08).setStrokeStyle(3,0x8be1d1,.7).setDepth(y+1);
+    this.regionalBoss.nameLabel=this.add.text(x,y-62,"GUARDIÃO DE ELYNDOR",{fontFamily:"Georgia,serif",fontSize:"13px",color:"#e4f2df",stroke:"#18292b",strokeThickness:4,letterSpacing:1}).setOrigin(.5).setDepth(y+70);
+    this.regionalBoss.bar=this.add.graphics().setScrollFactor(0).setDepth(1100);
+    this.regionalBoss.barLabel=this.add.text(480,78,"GUARDIÃO DE ELYNDOR · 2.400 / 2.400",{fontFamily:"Arial",fontSize:"12px",color:"#f2ead0",stroke:"#17251d",strokeThickness:4}).setOrigin(.5).setScrollFactor(0).setDepth(1101);
+    this.regionalBoss.telegraph=this.add.circle(x,y,132,0xe56a4f,.12).setStrokeStyle(4,0xff9a70,.9).setDepth(y+2).setVisible(false);
+    this.drawRegionalBossBar();
+    this.syncRegionalBoss();
+    this.time.addEvent({delay:1000,loop:true,callback:()=>this.syncRegionalBoss()});
+  }
+  drawRegionalBossBar(){
+    const boss=this.regionalBoss;if(!boss)return;
+    const width=300,ratio=Phaser.Math.Clamp(boss.hp/boss.maxHp,0,1);
+    boss.bar.clear();
+    boss.bar.fillStyle(0x14201d,.94).fillRoundedRect(330,48,width,13,6);
+    boss.bar.fillStyle(boss.phase===2?0xd17a55:0x69b9a3,1).fillRoundedRect(332,50,(width-4)*ratio,9,4);
+    boss.barLabel.setText("GUARDIÃO DE ELYNDOR · "+boss.hp.toLocaleString("pt-BR")+" / "+boss.maxHp.toLocaleString("pt-BR")+" · FASE "+boss.phase);
+    boss.nameLabel.setText(boss.defeated?"GUARDIÃO DERROTADO":"GUARDIÃO DE ELYNDOR");
+    boss.sprite.setAlpha(boss.defeated?.35:1);
+    boss.aura.setVisible(!boss.defeated);
+  }
+  async syncRegionalBoss(){
+    const boss=this.regionalBoss;if(!boss||!this.scene.isActive())return;
+    const backend=window.AetheriaBackend;
+    if(!backend?.hasOnlineCharacter?.())return;
+    const result=await backend.getRegionalBossState?.();
+    if(!this.scene.isActive()||!result?.ok||!result.boss)return;
+    const state=result.boss;
+    boss.hp=Number(state.hp)||0;boss.maxHp=Number(state.max_hp)||2400;
+    boss.phase=Number(state.phase)||1;boss.defeated=Boolean(state.defeated);
+    this.drawRegionalBossBar();
+    if(state.defeated&&boss.lastDefeatedNotice!==true){
+      boss.lastDefeatedNotice=true;
+      this.showCombatMessage("O Guardião foi derrotado! Retornará em breve.");
+    }else if(!state.defeated)boss.lastDefeatedNotice=false;
+  }
+  attackRegionalBoss(time){
+    const boss=this.regionalBoss;
+    if(!boss||boss.defeated||this.playerRespawning||time<this.attackCooldownAt||!Phaser.Input.Keyboard.JustDown(this.keys.SPACE))return false;
+    if(Phaser.Math.Distance.Between(this.player.x,this.player.y,boss.x,boss.y)>105)return false;
+    this.attackCooldownAt=time+550;
+    const backend=window.AetheriaBackend;
+    if(!backend?.hasOnlineCharacter?.()){this.showCombatMessage("Entre no jogo para enfrentar o Guardião.");return true;}
+    this.showCombatMessage("Golpeando o Guardião...");
+    Promise.resolve(backend.hitRegionalBoss?.()).then(result=>{
+      if(!this.scene.isActive())return;
+      if(result?.ok){
+        if(result.boss){boss.hp=Number(result.boss.hp)||0;boss.phase=Number(result.boss.phase)||1;boss.defeated=Boolean(result.boss.defeated);this.drawRegionalBossBar();}
+        this.showCombatMessage(result.reward_xp>0?"Guardião derrotado! +"+result.reward_xp+" XP.":"Golpe confirmado: -"+result.damage+" HP do chefe.");
+      }else this.showCombatMessage(result?.message||"Não foi possível confirmar o golpe.");
+    }).catch(()=>this.showCombatMessage("Falha ao conectar com o Guardião."));
+    return true;
+  }
+  updateRegionalBoss(time){
+    const boss=this.regionalBoss;if(!boss||boss.defeated||this.playerRespawning)return;
+    const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,boss.x,boss.y);
+    if(!boss.attackPending&&time>=boss.nextAttackAt&&distance<155){
+      boss.attackPending=true;
+      const phase=boss.phase;
+      boss.telegraph.setRadius(phase===2?150:125).setVisible(true).setAlpha(.22);
+      boss.telegraph.setStrokeStyle(4,phase===2?0xff7258:0xffc078,.95);
+      this.showCombatMessage(phase===2?"O Guardião prepara uma onda rúnica! Afaste-se!":"O Guardião prepara um impacto! Afaste-se!");
+      this.tweens.add({targets:boss.telegraph,alpha:.65,duration:520,yoyo:true,repeat:0});
+      this.time.delayedCall(850,()=>{
+        if(!this.scene.isActive()||boss.defeated)return;
+        boss.telegraph.setVisible(false);
+        boss.attackPending=false;boss.nextAttackAt=this.time.now+(boss.phase===2?2100:2600);
+        const backend=window.AetheriaBackend;
+        if(Phaser.Math.Distance.Between(this.player.x,this.player.y,boss.x,boss.y)<=155){
+          if(backend?.hasOnlineCharacter?.()){
+            Promise.resolve(backend.receiveRegionalBossStrike?.()).then(result=>{
+              if(result?.ok)this.showCombatMessage("O Guardião atingiu você! -"+result.damage+" HP.");
+            }).catch(()=>{});
+          }else this.damagePlayer(boss.phase===2?18:12);
+        }else this.showCombatMessage("Você escapou do impacto rúnico!");
+      });
+    }
   }
   drawMonsterBar(monster){
     if(!monster.active || !monster.hpBar) return;
@@ -432,6 +516,7 @@ class WorldScene extends Phaser.Scene {
   attackNearbyMonster(time){
     if(!Phaser.Input.Keyboard.JustDown(this.keys.SPACE) || time<this.attackCooldownAt || this.playerRespawning) return;
     if(this.attackNearbyPlayer(time)) return;
+    if(this.attackRegionalBoss(time))return;
     this.attackCooldownAt=time+550;
     let target=null,nearest=62;
     this.monsters.getChildren().forEach(monster=>{
@@ -675,6 +760,12 @@ class WorldScene extends Phaser.Scene {
     }
     // Mantém barras e nomes alinhados ao movimento físico dos monstros em todos os frames.
     if(this.monsters) this.monsters.getChildren().forEach(monster=>this.drawMonsterBar(monster));
+    if(this.regionalBoss&&!this.regionalBoss.defeated){
+      const boss=this.regionalBoss;
+      boss.sprite.setDepth(boss.sprite.y+35);
+      boss.aura.setPosition(boss.x,boss.y);
+      boss.nameLabel.setPosition(boss.x,boss.y-62);
+    }
     if(!this.player?.body)return;
     if(this.inventoryOpen){
       this.player.setVelocity(0,0);
@@ -711,6 +802,7 @@ class WorldScene extends Phaser.Scene {
         : "Você saiu da arena. A vila é uma zona segura.");
     }
     this.updateMonsters(time);
+    this.updateRegionalBoss(time);
     this.attackNearbyMonster(time);
     const left=this.cursors.left.isDown||this.keys.A.isDown,right=this.cursors.right.isDown||this.keys.D.isDown,up=this.cursors.up.isDown||this.keys.W.isDown,down=this.cursors.down.isDown||this.keys.S.isDown;
     const speed=this.keys.SHIFT.isDown?205:this.player.speed;let vx=(right?1:0)-(left?1:0),vy=(down?1:0)-(up?1:0),len=Math.hypot(vx,vy)||1;
