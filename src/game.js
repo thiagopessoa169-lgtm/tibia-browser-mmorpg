@@ -10,7 +10,7 @@ class WorldScene extends Phaser.Scene {
     this.cursors=this.input.keyboard.createCursorKeys();
     // addKeys captura W/A/S/D por padrão e pode impedir que inputs recebam essas letras.
     // Desabilitamos a captura padrão para que o navegador processe a digitação normalmente.
-    this.keys=this.input.keyboard.addKeys("W,A,S,D,SHIFT,SPACE,E,ESC", false);
+    this.keys=this.input.keyboard.addKeys("W,A,S,D,SHIFT,SPACE,E,ESC,I", false);
     this.attackCooldownAt = 0;
     this.playerHp = 100;
     this.playerMaxHp = 100;
@@ -58,6 +58,8 @@ class WorldScene extends Phaser.Scene {
     this.dialogueText=document.getElementById("npc-dialogue-text");
     this.questAcceptButton=document.getElementById("npc-quest-accept");
     this.dialogueOpen=false;
+    this.inventoryOpen=false;
+    this.inventoryPanel=document.getElementById("inventory-panel");
     this.currentNpcQuestKey=null;
     if(this.questAcceptButton)this.questAcceptButton.addEventListener("click",()=>this.acceptCurrentQuest());
     const dialogueClose=document.getElementById("npc-dialogue-close");
@@ -76,6 +78,12 @@ class WorldScene extends Phaser.Scene {
       syncRemotePlayers: (players) => this.syncRemotePlayers(players),
       applyServerHp: (hp) => this.applyServerHp(hp),
       loadQuestData: (data) => this.loadQuestData(data),
+      setInventoryOpen: (open) => {
+        this.inventoryOpen=Boolean(open);
+        if(this.inventoryPanel)this.inventoryPanel.hidden=!this.inventoryOpen;
+        if(this.inventoryOpen)this.player.setVelocity(0,0);
+      },
+      showMessage: (message) => this.showCombatMessage(message),
       loadProgress: (progress) => {
         this.playerLevel = Math.max(1, Math.floor(Number(progress?.level) || 1));
         this.playerMaxHp = Math.max(1, Math.floor(Number(progress?.max_hp) || 100));
@@ -545,6 +553,18 @@ class WorldScene extends Phaser.Scene {
       remote.label.setPosition(nextX, nextY - 28).setDepth(nextY + 50);
     }
     if(!this.player?.body)return;
+    if(this.inventoryOpen){
+      this.player.setVelocity(0,0);
+      if(Phaser.Input.Keyboard.JustDown(this.keys.ESC) || Phaser.Input.Keyboard.JustDown(this.keys.I)){
+        window.AetheriaBackend?.closeInventory?.();
+      }
+      return;
+    }
+    if(Phaser.Input.Keyboard.JustDown(this.keys.I)){
+      window.AetheriaBackend?.openInventory?.();
+      this.player.setVelocity(0,0);
+      return;
+    }
     const active=document.activeElement;
     const typing=active && (active.matches("input,textarea,select") || active.isContentEditable);
     if(typing || this.playerRespawning){this.player.setVelocity(0,0);return;}
