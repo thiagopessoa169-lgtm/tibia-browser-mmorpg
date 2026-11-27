@@ -54,3 +54,28 @@
 .quest-entry.is-completed span{color:#a9d89a}
 .quest-rewards{border-top:1px solid #71866a55;padding-top:7px;margin:6px 0 0;color:#d5dca9;font-size:9px;line-height:1.45}
 @media(max-width:600px){.quest-panel{top:78px;right:8px;width:43%;max-height:165px;padding:8px}.quest-panel h2{font-size:10px}.quest-entry{padding:5px 0}.quest-entry strong{font-size:9px}.quest-entry span,.quest-empty,.quest-rewards{font-size:8px}}
+
+
+/* Etapa 4.3 — bolsa e equipamentos */
+.account-bar #inventory-open{background:#9eae79;color:#1c2b20;border-color:#b5c58e}
+.inventory-panel{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100% - 28px));max-height:min(82%,520px);overflow:auto;padding:18px;background:linear-gradient(145deg,#1b3028f7,#101d19f7);border:1px solid #a5b88a;border-radius:13px;box-shadow:0 18px 60px #000b;color:#edf3e8;backdrop-filter:blur(9px)}
+.inventory-heading{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #71866a66;padding-bottom:12px}
+.inventory-kicker{font-size:9px;letter-spacing:2px;color:#b8cb91}
+.inventory-heading h2{margin:3px 0;font:600 19px Georgia,serif;color:#eadcae}
+.inventory-heading small{font-size:10px;color:#aebfae}
+.inventory-heading>button{width:32px;height:32px;border:1px solid #71866a;border-radius:7px;background:#263d31;color:#edf3e8;font-size:23px;cursor:pointer}
+.inventory-columns{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;margin-top:14px}
+.inventory-columns h3{font:600 13px Georgia,serif;color:#d8e5c8;margin:0 0 9px}
+#inventory-list{display:grid;gap:8px}
+.inventory-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border:1px solid #71866a66;border-radius:8px;background:#14251edb}
+.inventory-item strong,.equipment-slot strong{display:block;font-size:11px;color:#f0e7c9}
+.inventory-item small{display:block;margin-top:3px;font-size:9px;color:#a9c18e}
+.inventory-item p{margin:4px 0 0;font-size:9px;color:#b9c8b9;line-height:1.4}
+.inventory-action{flex:none;border:1px solid #a9c38a;border-radius:6px;background:#9eae79;color:#1c2b20;font-size:10px;font-weight:700;padding:7px 10px;cursor:pointer}
+.inventory-action.secondary{background:#263d31;color:#dbe8d9;border-color:#627968}
+.inventory-action:disabled{opacity:.5;cursor:wait}
+.equipment-slot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid #71866a66;border-radius:8px;background:#14251edb;margin-bottom:8px}
+.equipment-slot span{margin-left:auto;font-size:10px;color:#c4d3c1;text-align:right}
+.inventory-empty{font-size:10px;color:#b4c4b5;line-height:1.5}
+.inventory-help{margin:12px 0 0;color:#9eb09e;font-size:9px}
+@media(max-width:600px){.inventory-panel{padding:12px;max-height:84%}.inventory-heading h2{font-size:16px}.inventory-columns{grid-template-columns:1fr;gap:14px}.inventory-item{padding:8px}.inventory-item strong{font-size:10px}.inventory-action{font-size:9px;padding:6px 8px}}
