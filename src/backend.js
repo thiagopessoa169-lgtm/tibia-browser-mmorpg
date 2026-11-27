@@ -269,7 +269,7 @@
     const x = Number(position.x), y = Number(position.y);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     const moved = state.lastX === null || Math.abs(x - state.lastX) + Math.abs(y - state.lastY) >= 1;
-    if (!moved || now - state.lastBroadcastAt < 160) return;
+    if (!moved || now - state.lastBroadcastAt < 100) return;
     state.lastBroadcastAt = now;
     state.lastX = x;
     state.lastY = y;
