@@ -313,7 +313,12 @@ class WorldScene extends Phaser.Scene {
   }
   createMonsters(){
     this.monsters = this.physics.add.group();
-    this.monsterSpawns=this.mapId==="ruinas-elyndor"?[]:this.mapId==="bosque-antigo"?[
+    this.monsterSpawns=this.mapId==="ruinas-elyndor"?[
+      {x:25*TILE+16,y:16*TILE+16,name:"Sentinela de Pedra",texture:"stone-sentinel",hp:145,xp:55,damage:12,speed:43,aggro:190,tint:0xc3c9c3},
+      {x:47*TILE+16,y:17*TILE+16,name:"Fagulha Rúnica",texture:"rune-wisp",hp:90,xp:50,damage:8,speed:86,aggro:255,tint:0xb5e8ef},
+      {x:25*TILE+16,y:32*TILE+16,name:"Sentinela de Pedra",texture:"stone-sentinel",hp:145,xp:55,damage:12,speed:43,aggro:190,tint:0xc3c9c3},
+      {x:47*TILE+16,y:31*TILE+16,name:"Fagulha Rúnica",texture:"rune-wisp",hp:90,xp:50,damage:8,speed:86,aggro:255,tint:0xb5e8ef}
+    ]:this.mapId==="bosque-antigo"?[
       {x:22*TILE+16,y:13*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7},{x:49*TILE+16,y:14*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7},{x:17*TILE+16,y:33*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7},{x:58*TILE+16,y:32*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7}
     ]:[
       {x:24*TILE+16,y:13*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:48*TILE+16,y:14*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:13*TILE+16,y:29*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:60*TILE+16,y:30*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true}
