@@ -112,7 +112,7 @@ Deno.serve(async (req: Request) => {
       return json({ ok: false, message: "Não foi possível atualizar o inventário." }, 500, origin);
     }
     if (!result.data?.ok) {
-      return json(result.data ?? { ok: false, message: "Ação não confirmada." }, 409, origin);
+      return json(result.data ?? { ok: false, message: "Ação não confirmada." }, 200, origin);
     }
     actionResult = result.data;
   }
