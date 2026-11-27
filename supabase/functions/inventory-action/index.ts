@@ -89,6 +89,7 @@ Deno.serve(async (req: Request) => {
     return json({ ok: false, message: "Espaço de equipamento inválido." }, 400, origin);
   }
 
+  let actionResult: any = { ok: true };
   if (action === "list") {
     const initialized = await admin.rpc("apply_inventory_action", {
       p_character_id: characterId,
@@ -113,6 +114,7 @@ Deno.serve(async (req: Request) => {
     if (!result.data?.ok) {
       return json(result.data ?? { ok: false, message: "Ação não confirmada." }, 409, origin);
     }
+    actionResult = result.data;
   }
 
   const [inventory, equipment, updatedCharacter] = await Promise.all([
@@ -130,6 +132,7 @@ Deno.serve(async (req: Request) => {
   return json({
     ok: true,
     action,
+    action_result: actionResult,
     inventory: inventory.data ?? [],
     equipment: equipment.data ?? [],
     character: updatedCharacter.data
