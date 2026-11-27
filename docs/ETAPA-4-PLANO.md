@@ -2,7 +2,7 @@
 
 ## Status
 
-**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 4.1 foi aprovada. A subetapa 4.2 foi implementada e publicada, aguardando validação. As subetapas 4.3 e 4.4 ainda não foram iniciadas.
+**Planejamento aprovado pelo usuário em 2026-11-27.** As subetapas 4.1 e 4.2 foram aprovadas. A subetapa 4.3 está implementada e publicada para validação; a 4.4 ainda não foi iniciada.
 
 ## Objetivo
 
@@ -32,7 +32,7 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 ### 4.2 — Sistema de missões
 
-**Status: implementação publicada, aguardando validação do usuário.**
+**Status: aprovada pelo usuário.**
 
 - [x] Missão de combate: derrotar três Lodos da Floresta.
 - [x] Missão de coleta: recolher três ervas em pontos fixos da vila.
@@ -46,12 +46,15 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 ### 4.3 — Inventário e equipamentos
 
-- Bolsa com capacidade limitada.
-- Itens empilháveis quando aplicável.
-- Equipar e remover equipamentos.
-- Categorias iniciais: poções, armas, armaduras e materiais.
-- Persistência segura do inventário no Supabase.
-- Regras de validação para impedir duplicação ou alteração indevida de itens e recompensas.
+**Status: implementação publicada, aguardando validação do usuário.**
+
+- [x] Bolsa visual com capacidade indicada de 20 itens e quantidades empilháveis.
+- [x] Itens iniciais: ervas medicinais, essências e equipamentos de vestimenta/acessório.
+- [x] Equipar e remover itens nos espaços de corpo, pés e amuleto.
+- [x] Usar erva medicinal para recuperar até 25 HP, com validação no servidor.
+- [x] Recompensas das missões integradas à mesma bolsa.
+- [x] Persistência segura no Supabase, com RLS e mutações feitas por Edge Function autenticada.
+- [x] RPC transacional para consumo, equipar e remover, evitando duplicação de itens.
 
 ### 4.4 — Expansão do mundo
 
@@ -66,16 +69,16 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 - NPCs podem ser encontrados e usados sem interromper o movimento ou multiplayer.
 - Diálogos abrem e fecham corretamente.
 - Missões registram objetivos e progresso corretamente, inclusive após reconectar.
-- Itens podem ser adquiridos, armazenados, equipados e removidos conforme as regras.
+- Itens podem ser armazenados, consumidos, equipados e removidos conforme as regras.
 - Inventário e progresso não podem ser alterados livremente por outro usuário.
 - Transições entre regiões mantêm o personagem e a sessão consistentes.
 - Etapas 1, 2 e 3 continuam funcionando, incluindo combate PvE, salvamento de progresso e PvP somente na arena.
 
 ## Sequência de execução
 
-1. 4.1 — NPCs e diálogos.
-2. 4.2 — Missões.
-3. 4.3 — Inventário e equipamentos.
-4. 4.4 — Expansão do mundo.
+1. 4.1 — NPCs e diálogos (aprovada).
+2. 4.2 — Missões (aprovada).
+3. 4.3 — Inventário e equipamentos (aguardando validação).
+4. 4.4 — Expansão do mundo (não iniciada).
 
 Cada subetapa exige autorização para iniciar e validação do usuário antes da próxima.
