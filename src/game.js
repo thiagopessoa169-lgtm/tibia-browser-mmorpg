@@ -496,6 +496,11 @@ class WorldScene extends Phaser.Scene {
   }
   updateMonsters(time){
     if(!this.player || this.playerRespawning)return;
+    // IA e barras são atualizadas em passos controlados, em vez de redesenhar tudo a cada frame.
+    if(time < (this.nextMonsterAiAt || 0)) return;
+    this.nextMonsterAiAt = time + 100;
+    const refreshMonsterBars = time >= (this.nextMonsterBarAt || 0);
+    if(refreshMonsterBars) this.nextMonsterBarAt = time + 250;
     this.monsters.getChildren().forEach(monster=>{
       if(!monster.active)return;
       const dx=this.player.x-monster.x,dy=this.player.y-monster.y;
@@ -519,7 +524,7 @@ class WorldScene extends Phaser.Scene {
         else monster.setVelocity(0,0);
       }
       monster.setDepth(monster.y+25);
-      this.drawMonsterBar(monster);
+      if(refreshMonsterBars) this.drawMonsterBar(monster);
     });
   }
   updateRemotePlayer(data){
