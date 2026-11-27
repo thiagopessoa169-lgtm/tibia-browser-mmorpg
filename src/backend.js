@@ -191,7 +191,7 @@
     state.lastPersistAt = 0;
     state.lastBroadcastAt = 0;
     state.mapId=character.map_id==="bosque-antigo"?"bosque-antigo":"aetheria-village";
-    window.AetheriaWorld?.loadMap?.(state.mapId,x,y);
+    window.AetheriaWorld?.loadMap?.(state.mapId,x,y,{level,hp,max_hp:maxHp,xp});
     window.AetheriaWorld?.loadProgress?.({ level, hp, max_hp: maxHp, xp });
     $("player-name").textContent = character.name;
     $("player-level").textContent = "Nível " + level + " · Aventureiro";
