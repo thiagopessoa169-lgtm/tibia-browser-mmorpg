@@ -195,7 +195,6 @@
     $("player-level").textContent = "Nível " + level + " · Aventureiro";
     await connectWorld();
     await loadQuests();
-    await loadInventory();
     // Se a sessão terminou durante a tela de derrota, retoma no ponto seguro.
     if (defeated) {
       await saveProgress({ level, hp, max_hp: maxHp, xp }, { immediate: true });
@@ -476,6 +475,7 @@
     const result = await invokeQuestAction("list");
     if (!result?.ok) {
       console.warn("[Aetheria] Diário indisponível:", result?.message);
+      await loadInventory();
       return result;
     }
     state.questData = result;
