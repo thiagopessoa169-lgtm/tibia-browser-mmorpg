@@ -486,9 +486,8 @@ class WorldScene extends Phaser.Scene {
     if(xpText)xpText.textContent=this.playerXp+" / "+(this.playerLevel*100)+" XP";
   }
   showCombatMessage(message){
-    const hint=document.querySelector(".hint");
-    if(!hint)return;
-    hint.textContent=message;
+    const hintMessage=document.getElementById("hint-message");
+    if(hintMessage){hintMessage.textContent=message;hintMessage.hidden=false;}
     // Cada mensagem controla apenas o próprio objeto, sem callbacks antigos
     // apagarem uma mensagem mais recente.
     if(this.combatMessage){
@@ -502,8 +501,10 @@ class WorldScene extends Phaser.Scene {
     this.combatMessage=messageObject;
     this.time.delayedCall(1300,()=>{
       if(messageObject.active) messageObject.destroy();
-      if(this.combatMessage===messageObject) this.combatMessage=null;
-      hint.textContent="WASD / Setas — mover · Shift — correr · E — interagir · I — bolsa · Espaço — ação";
+      if(this.combatMessage===messageObject){
+        this.combatMessage=null;
+        if(hintMessage){hintMessage.hidden=true;hintMessage.textContent="";}
+      }
     });
   }
   updateMonsters(time){
