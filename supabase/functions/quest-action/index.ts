@@ -59,7 +59,7 @@ Deno.serve(async(req:Request)=>{
   if(action==="list"){
     const [quests,items,events]=await Promise.all([
       admin.from("character_quests").select("quest_key,status,progress,target,accepted_at,completed_at").eq("character_id",characterId),
-      admin.from("character_quest_items").select("item_key,quantity").eq("character_id",characterId),
+      admin.from("character_inventory").select("item_key,quantity").eq("character_id",characterId).in("item_key",["medicinal_herb","slime_essence"]),
       admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","herb:%")
     ]);
     if(quests.error||items.error||events.error)return json({ok:false,message:"Não foi possível carregar o diário."},500,origin);
