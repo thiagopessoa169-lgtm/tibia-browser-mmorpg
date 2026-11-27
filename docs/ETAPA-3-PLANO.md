@@ -31,10 +31,18 @@ Adicionar o primeiro ciclo de combate ao Aetheria Online sem quebrar autenticaç
 - Exibir HP do jogador e dos monstros.
 
 ### 3.2 — Progressão e morte
-- Persistir HP, experiência e nível.
-- Conceder experiência ao derrotar monstros.
-- Aplicar fórmula de evolução configurável.
-- Ao chegar a 0 HP, interromper ações de combate e retornar o personagem ao ponto de respawn após a tela/aviso de derrota.
+**Status: implementação publicada, aguardando validação no navegador.**
+
+- [x] Adicionar XP persistente à tabela de personagens, com validação no banco.
+- [x] Carregar HP, HP máximo, nível e XP ao selecionar o personagem.
+- [x] Salvar dano recebido, XP ganho, evolução de nível e HP máximo.
+- [x] Persistir a derrota e restaurar HP e posição segura no respawn.
+- [x] Restringir os privilégios da tabela e manter RLS por proprietário.
+- [ ] Validar no site público, incluindo sair/entrar e reconectar depois de uma derrota.
+
+A fórmula atual mantém o limite de XP em 100 × nível atual. Cada evolução aumenta o HP máximo em 10 pontos.
+
+**Limite do protótipo:** o cálculo do combate ainda ocorre no navegador. A persistência guarda o estado do personagem, mas não é uma validação antifraude de combate; ações competitivas e PVP exigirão lógica autoritativa no servidor.
 
 ### 3.3 — PVP
 - Criar uma arena identificada no mapa.
