@@ -366,7 +366,7 @@ class WorldScene extends Phaser.Scene {
     boss.bar.fillStyle(boss.phase===2?0xd17a55:0x69b9a3,1).fillRoundedRect(332,50,(width-4)*ratio,9,4);
     boss.barLabel.setText("GUARDIÃO DE ELYNDOR · "+boss.hp.toLocaleString("pt-BR")+" / "+boss.maxHp.toLocaleString("pt-BR")+" · FASE "+boss.phase);
     boss.nameLabel.setText(boss.defeated?"GUARDIÃO DERROTADO":"GUARDIÃO DE ELYNDOR");
-    boss.sprite.setAlpha(boss.defeated?.35:1);
+    boss.sprite.setAlpha(boss.defeated ? .35 : 1);
     boss.aura.setVisible(!boss.defeated);
   }
   async syncRegionalBoss(){
@@ -386,7 +386,7 @@ class WorldScene extends Phaser.Scene {
   }
   attackRegionalBoss(time){
     const boss=this.regionalBoss;
-    if(!boss||boss.defeated||this.playerRespawning||time<this.attackCooldownAt||!Phaser.Input.Keyboard.JustDown(this.keys.SPACE))return false;
+    if(!boss||boss.defeated||this.playerRespawning||time<this.attackCooldownAt)return false;
     if(Phaser.Math.Distance.Between(this.player.x,this.player.y,boss.x,boss.y)>105)return false;
     this.attackCooldownAt=time+550;
     const backend=window.AetheriaBackend;
