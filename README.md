@@ -1,6 +1,6 @@
 # Aetheria Online — MMORPG 2D para navegador
 
-Protótipo de MMORPG 2D top-down. A Etapa 1 trouxe a vila explorável e a movimentação. As Etapas 1, 2 e 3.1 foram aprovadas. A Etapa 3.2 (progressão persistente) está publicada para validação.
+Protótipo de MMORPG 2D top-down. A Etapa 1 trouxe a vila explorável e a movimentação. As Etapas 1, 2, 3.1 e 3.2 foram aprovadas. A Etapa 3.3 (PvP na arena) está publicada para validação com duas contas.
 
 ## Executar
 
@@ -18,10 +18,11 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 
 - `index.html` — entrada do jogo e interface de conta/personagens
 - `src/game.js` — mapa, câmera, controles e jogadores remotos
-- `src/backend.js` — autenticação, personagens, presença e sincronização
+- `src/backend.js` — autenticação, personagens, presença, sincronização e chamadas ao PvP
 - `src/supabase-config.js` — URL e chave publishable do projeto
 - `src/style.css` — interface responsiva
 - `supabase/migrations/` — SQL de tabelas e políticas RLS/Realtime
+- `supabase/functions/arena-attack/` — validação de duelos no servidor
 - `docs/` — roadmap e guias de configuração
 - `netlify.toml` e `vercel.json` — hospedagem estática
 
@@ -29,7 +30,7 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 
 1. Base jogável no navegador (aprovada)
 2. Supabase Auth, personagens, PostgreSQL e Realtime (aprovada)
-3. Combate, monstros, XP e PVP (Etapa 3.1 aprovada; Etapa 3.2 em validação)
+3. Combate, monstros, XP e PvP (Etapas 3.1 e 3.2 aprovadas; Etapa 3.3 em validação)
 4. NPCs, quests, inventário e mapas
 5. Polimento, performance e deploy
 
