@@ -355,6 +355,26 @@
     return result;
   }
 
+  async function getRegionalBossState() {
+    return invokeProgressAction("boss_state");
+  }
+
+  async function hitRegionalBoss() {
+    const position=currentPosition();
+    if(!position || !(await persistPosition(position))) return {ok:false,message:"Não foi possível validar sua posição."};
+    const result=await invokeProgressAction("boss_hit");
+    if(result?.ok && result.character) window.AetheriaWorld?.loadProgress?.(result.character);
+    return result;
+  }
+
+  async function receiveRegionalBossStrike() {
+    const position=currentPosition();
+    if(!position || !(await persistPosition(position))) return {ok:false,message:"Não foi possível validar sua posição."};
+    const result=await invokeProgressAction("boss_strike");
+    if(result?.ok && result.character) window.AetheriaWorld?.applyServerHp?.(result.character.hp);
+    return result;
+  }
+
   function currentPosition() {
     return window.AetheriaWorld?.getLocalPosition?.() ||
       (state.lastX !== null && state.lastY !== null
@@ -729,6 +749,9 @@
     awardMonsterDefeat,
     applyMonsterDamage,
     respawnCharacter,
+    getRegionalBossState,
+    hitRegionalBoss,
+    receiveRegionalBossStrike,
     hasOnlineCharacter: () => Boolean(state.client && state.user && state.character),
     attackPlayer,
     loadQuests,
