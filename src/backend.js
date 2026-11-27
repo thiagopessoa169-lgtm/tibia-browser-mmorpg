@@ -489,13 +489,25 @@
   }
 
   async function collectHerb(nodeKey) {
+    const position = currentPosition();
+    if (!position || !(await persistPosition(position))) {
+      return { ok: false, message: "Não foi possível atualizar sua posição. Tente novamente." };
+    }
     const result = await invokeQuestAction("collect_herb", { node_key: nodeKey });
     if (result?.ok) await loadQuests();
     return result;
   }
 
-  async function recordSlimeDefeat(spawnIndex) {
-    const result = await invokeQuestAction("record_slime_defeat", { spawn_index: spawnIndex });
+  async function recordSlimeDefeat(spawnIndex, defeatPosition) {
+    const position = currentPosition();
+    if (!position || !(await persistPosition(position))) {
+      return { ok: false, message: "Não foi possível atualizar sua posição. Tente novamente." };
+    }
+    const result = await invokeQuestAction("record_slime_defeat", {
+      spawn_index: spawnIndex,
+      defeat_x: Number(defeatPosition?.x),
+      defeat_y: Number(defeatPosition?.y)
+    });
     if (result?.ok && result.tracked !== false) await loadQuests();
     return result;
   }
