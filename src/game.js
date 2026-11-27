@@ -179,7 +179,7 @@ class WorldScene extends Phaser.Scene {
     this.refreshNpcQuestButton();
   }
   findNearbyHerb(){
-    let nearest=null,distanceLimit=52;
+    let nearest=null,distanceLimit=40;
     (this.herbNodes||[]).forEach((node)=>{
       if(node.collected||!node.sprite.active)return;
       const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,node.x,node.y);
@@ -365,11 +365,12 @@ class WorldScene extends Phaser.Scene {
     this.drawMonsterBar(target);
     if(target.hp<=0){
       const x=target.homeX,y=target.homeY,index=target.spawnIndex;
+      const defeatPosition={x:target.x,y:target.y};
       target.nameLabel.destroy();target.hpBar.destroy();target.destroy();
       this.gainExperience(25);
       this.showCombatMessage("+25 XP");
       Promise.resolve(window.AetheriaBackend?.flushProgress?.())
-        .then(()=>window.AetheriaBackend?.recordSlimeDefeat?.(index))
+        .then(()=>window.AetheriaBackend?.recordSlimeDefeat?.(index,defeatPosition))
         .then(result=>{
           if(result?.ok&&result.completed_now)this.showCombatMessage("Missão concluída! Recompensa registrada.");
           else if(result?.ok&&result.tracked!==false)this.showCombatMessage("Progresso da missão atualizado: "+result.progress+" / "+result.target+".");
