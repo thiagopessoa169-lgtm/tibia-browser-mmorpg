@@ -24,7 +24,12 @@ const SPAWNS: Record<string, Array<{x:number;y:number;damage:number}>> = {
     {x:17*32+16,y:33*32+16,damage:10},
     {x:58*32+16,y:32*32+16,damage:10}
   ],
-  "ruinas-elyndor": []
+  "ruinas-elyndor": [
+    {x:25*32+16,y:16*32+16,damage:12},
+    {x:47*32+16,y:17*32+16,damage:8},
+    {x:25*32+16,y:32*32+16,damage:12},
+    {x:47*32+16,y:31*32+16,damage:8}
+  ]
 };
 
 function json(data: unknown, status = 200, origin = "") {
