@@ -12,7 +12,7 @@
 <main id="app">
 <header class="topbar">
   <div class="brand"><span class="brand-mark">✦</span><div><strong>AETHERIA</strong><small>ONLINE · PROTÓTIPO</small></div></div>
-  <div class="world-status"><span class="status-dot"></span><span id="backend-status">Mundo local</span><span class="divider">|</span> Etapa 3</div>
+  <div class="world-status"><span class="status-dot"></span><span id="backend-status">Mundo local</span><span class="divider">|</span> Etapa 4</div>
 </header>
 <section class="account-area" aria-label="Conta e personagens">
   <div id="auth-panel" class="account-panel">
@@ -43,6 +43,14 @@
 </section>
 <section class="game-shell" aria-label="Jogo Aetheria Online">
   <div id="game"></div>
+  <section id="npc-dialogue" class="npc-dialogue" role="dialog" aria-modal="false" aria-labelledby="npc-dialogue-title" hidden>
+    <div class="npc-dialogue-heading">
+      <div><span class="npc-dialogue-kicker">CONVERSA</span><h2 id="npc-dialogue-title">Personagem</h2></div>
+      <button id="npc-dialogue-close" type="button" class="npc-dialogue-close" aria-label="Fechar conversa">×</button>
+    </div>
+    <p id="npc-dialogue-text"></p>
+    <small>Pressione E ou Esc para fechar</small>
+  </section>
   <div class="hud">
     <div class="player-card"><div class="avatar">A</div><div class="player-info">
       <strong id="player-name">Viajante</strong><span id="player-level">Nível 1 · Aventureiro</span>
