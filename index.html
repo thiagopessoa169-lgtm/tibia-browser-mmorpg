@@ -12,7 +12,7 @@
 <main id="app">
 <header class="topbar">
   <div class="brand"><span class="brand-mark">✦</span><div><strong>AETHERIA</strong><small>ONLINE · PROTÓTIPO</small></div></div>
-  <div class="world-status"><span class="status-dot"></span><span id="backend-status">Mundo local</span><span class="divider">|</span> ETAPA 5 <span class="visual-version">VISUAL 5.1</span></div>
+  <div class="world-status"><span class="status-dot"></span><span id="backend-status" role="status" aria-live="polite" aria-atomic="true">Mundo local</span><span class="divider">|</span> ETAPA 5 <span class="visual-version">EXPERIÊNCIA 5.3</span></div>
 </header>
 <section class="account-area" aria-label="Conta e personagens">
   <div id="auth-panel" class="account-panel">
@@ -37,8 +37,8 @@
   </div>
   <div id="account-bar" class="account-bar" hidden>
     <strong id="account-label">Conta conectada</strong>
-    <span>Jogadores online: <b id="online-count">1</b></span>
-    <button id="inventory-open" type="button" class="secondary">Bolsa (I)</button><button id="logout-btn" type="button" class="secondary">Sair</button>
+    <span aria-label="Quantidade de jogadores online">Jogadores online: <b id="online-count" aria-live="polite">1</b></span>
+    <button id="inventory-open" type="button" class="secondary" aria-label="Abrir bolsa de itens, atalho I">Bolsa (I)</button><button id="logout-btn" type="button" class="secondary">Sair</button>
   </div>
 </section>
 <section class="game-shell" aria-label="Jogo Aetheria Online">
@@ -74,7 +74,7 @@
     </div></div>
     <div class="location-card"><span>LOCALIZAÇÃO</span><strong>Vila de Aetheria</strong></div>
   </div>
-  <div class="hint">WASD / Setas — mover · Shift — correr · Espaço — atacar / duelar</div>
+  <div class="hint" role="status" aria-live="polite" aria-atomic="true"><span class="control-tip"><kbd>WASD</kbd> / <kbd>← ↑ ↓ →</kbd> mover</span><span class="control-tip"><kbd>Shift</kbd> correr</span><span class="control-tip"><kbd>Espaço</kbd> atacar / duelar</span><span class="control-tip"><kbd>E</kbd> interagir / portal</span><span class="control-tip"><kbd>I</kbd> bolsa</span><span class="control-tip"><kbd>Esc</kbd> fechar janela</span></div>
 </section>
 <footer>Protótipo de desenvolvimento · Entre com sua conta para salvar seu personagem e jogar online.</footer>
 </main>
