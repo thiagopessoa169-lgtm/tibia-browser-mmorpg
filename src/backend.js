@@ -218,6 +218,19 @@
         if (!payload || payload.user_id === state.user.id) return;
         window.AetheriaWorld?.updateRemotePlayer?.(payload);
       })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "characters",
+        filter: "id=eq." + state.character.id
+      }, ({ new: row }) => {
+        if (!row || row.id !== state.character?.id) return;
+        const hp = Number(row.hp);
+        if (Number.isFinite(hp)) {
+          window.AetheriaWorld?.applyServerHp?.(hp);
+          state.character = { ...state.character, hp };
+        }
+      })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
           state.connected = true;
@@ -365,6 +378,23 @@
     }
   }
 
+  async function attackPlayer(targetCharacterId) {
+    if (!state.client || !state.character || !state.user) {
+      return { ok: false, message: "Entre no jogo para participar da arena." };
+    }
+    const { data, error } = await state.client.functions.invoke("arena-attack", {
+      body: {
+        attacker_character_id: state.character.id,
+        target_character_id: targetCharacterId
+      }
+    });
+    if (error) {
+      console.warn("[Aetheria] Falha no duelo:", error.message);
+      return { ok: false, message: error.message || "Não foi possível realizar o duelo." };
+    }
+    return data || { ok: false, message: "O servidor não confirmou o duelo." };
+  }
+
   async function logout() {
     await flushProgress();
     await saveCurrentPosition();
@@ -426,6 +456,7 @@
     saveCurrentPosition,
     saveProgress,
     flushProgress,
+    attackPlayer,
     isOnline: () => state.connected
   };
   document.addEventListener("DOMContentLoaded", init);
