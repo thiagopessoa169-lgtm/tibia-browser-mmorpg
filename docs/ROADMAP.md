@@ -31,9 +31,9 @@
 - [x] 5.4 Revisão, correção de progressão, auditoria de permissões e deploy.
 
 ## Etapa 6 — Expansão do mundo e novos desafios
-**Status: planejamento aprovado; 6.1 implementada e publicada para teste em 2026-11-27.**
+**Status: planejamento aprovado; 6.1 e 6.2 aprovadas pelo usuário em 2026-11-27.**
 - [x] 6.1 Terceira região explorável (Ruínas de Elyndor) — aprovada.
-- [ ] 6.2 Novos monstros e comportamento — publicada para teste.
+- [x] 6.2 Novos monstros e comportamento — aprovada.
 - [ ] 6.3 Chefe regional.
 - [ ] 6.4 Missões e NPCs da nova região.
 - [ ] 6.5 Recompensas e equipamentos.
