@@ -34,7 +34,7 @@ Escopo desta subetapa:
 - Testar em navegador desktop e tela menor, observando travamentos, erros no console e comportamento multiplayer.
 - Preservar combate, movimento, missões, inventário, progresso e regras de PvP.
 
-**Primeira otimização aplicada:** atualização da lógica de IA dos monstros em intervalos de 100 ms e redesenho das barras/nomes em intervalos de 250 ms, mantendo o movimento físico contínuo entre as atualizações.
+**Otimizações e correções aplicadas:** IA dos monstros executada em intervalos de 100 ms; barras e nomes acompanham os sprites em todos os frames, redesenhando a barra somente quando o HP muda; listeners globais de foco do teclado são removidos no encerramento da cena para evitar acúmulo após trocar de região. A frequência de broadcast (100 ms quando há movimento) e a persistência de posição (1.000 ms fora da arena e 300 ms na arena) foram revisadas e mantidas sem alterações.
 
 **Critérios de aceitação:** jogo inicia e troca de região sem erros; monstros continuam patrulhando, perseguindo e atacando; barras de vida continuam corretas após receber dano; movimento e combate do jogador permanecem responsivos; multiplayer e salvamento continuam funcionando.
 
