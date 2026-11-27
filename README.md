@@ -18,11 +18,11 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 
 - `index.html` — entrada do jogo e interface de conta/personagens
 - `src/game.js` — regiões, portais, câmera, controles e jogadores remotos
-- `src/backend.js` — autenticação, personagens, presença, sincronização e chamadas ao PvP
+- `src/backend.js` — autenticação, personagens, presença, sincronização e chamadas ao servidor
 - `src/supabase-config.js` — URL e chave publishable do projeto
 - `src/style.css` — interface responsiva
 - `supabase/migrations/` — SQL de tabelas e políticas RLS/Realtime
-- `supabase/functions/arena-attack/`, `quest-action/` e `inventory-action/` — validação de duelos, missões e inventário no servidor
+- `supabase/functions/arena-attack/`, `quest-action/`, `inventory-action/` e `progress-action/` — validação de PvP, missões, inventário e progressão
 - `docs/` — roadmap e guias de configuração
 - `netlify.toml` e `vercel.json` — hospedagem estática
 
@@ -30,8 +30,8 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 
 1. Base jogável no navegador (aprovada)
 2. Supabase Auth, personagens, PostgreSQL e Realtime (aprovada)
-3. Combate, monstros, XP e PvP (aprovada; revisão de integridade da progressão documentada no plano da Etapa 5)
+3. Combate, monstros, XP e PvP (aprovada; gravação dos dados de progressão protegida pelo servidor)
 4. NPCs, missões, inventário e expansão do mundo (aprovada)
-5. Polimento visual, performance, experiência do jogador (5.1, 5.2 e 5.3 aprovadas; 5.4 revisão final em andamento)
+5. Polimento visual, performance e experiência do jogador (5.1, 5.2 e 5.3 aprovadas; 5.4 revisão final em teste)
 
-Consulte [o plano da Etapa 5](docs/ETAPA-5-PLANO.md) para os resultados da auditoria de produção e os pontos de atenção pendentes.
+Consulte [o plano da Etapa 5](docs/ETAPA-5-PLANO.md) para os resultados da auditoria, limitações conhecidas e testes pendentes.
