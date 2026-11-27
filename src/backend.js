@@ -12,6 +12,9 @@
     lastPersistAt: 0,
     lastX: null,
     lastY: null,
+    progressSaveTimer: null,
+    pendingProgress: null,
+    progressSaving: false,
     mode: "login"
   };
 
@@ -110,7 +113,7 @@
     list.replaceChildren();
     const { data, error } = await state.client
       .from("characters")
-      .select("id,name,level,hp,max_hp,x,y,map_id")
+      .select("id,name,level,hp,max_hp,xp,x,y,map_id")
       .order("created_at", { ascending: true });
     if (error) {
       message($("character-message"), "Erro ao carregar personagens: " + error.message, "error");
@@ -129,7 +132,7 @@
         const title = document.createElement("strong");
         title.textContent = character.name;
         const detail = document.createElement("span");
-        detail.textContent = "Nível " + character.level + " · " + character.hp + "/" + character.max_hp + " HP";
+        detail.textContent = "Nível " + character.level + " · " + character.hp + "/" + character.max_hp + " HP · " + (character.xp || 0) + " XP";
         button.append(title, detail);
         button.addEventListener("click", () => selectCharacter(character));
         list.append(button);
@@ -164,21 +167,34 @@
   }
 
   async function selectCharacter(character) {
-    state.character = character;
+    if (state.progressSaveTimer) clearTimeout(state.progressSaveTimer);
+    state.pendingProgress = null;
+    const level = Math.max(1, Math.floor(Number(character.level) || 1));
+    const maxHp = Math.max(1, Math.floor(Number(character.max_hp) || 100));
+    const defeated = Number(character.hp) <= 0;
+    const hp = defeated ? maxHp : Math.min(maxHp, Math.max(0, Math.floor(Number(character.hp) || maxHp)));
+    const xp = Math.min(level * 100 - 1, Math.max(0, Math.floor(Number(character.xp) || 0)));
+    const x = defeated ? 1168 : Number(character.x);
+    const y = defeated ? 784 : Number(character.y);
+    state.character = { ...character, level, hp, max_hp: maxHp, xp, x, y };
     showCharacters();
     $("character-panel").hidden = true;
     $("account-bar").hidden = false;
     $("account-label").textContent = character.name + " · " + state.user.email;
-    state.lastX = Number(character.x);
-    state.lastY = Number(character.y);
+    state.lastX = x;
+    state.lastY = y;
     state.lastPersistAt = 0;
     state.lastBroadcastAt = 0;
-    if (window.AetheriaWorld?.setLocalPosition) {
-      window.AetheriaWorld.setLocalPosition(character.x, character.y);
-    }
+    window.AetheriaWorld?.setLocalPosition?.(x, y);
+    window.AetheriaWorld?.loadProgress?.({ level, hp, max_hp: maxHp, xp });
     $("player-name").textContent = character.name;
-    $("player-level").textContent = "Nível " + character.level + " · Aventureiro";
+    $("player-level").textContent = "Nível " + level + " · Aventureiro";
     await connectWorld();
+    // Se a sessão terminou durante a tela de derrota, retoma no ponto seguro.
+    if (defeated) {
+      await saveProgress({ level, hp, max_hp: maxHp, xp }, { immediate: true });
+      await persistPosition({ x, y });
+    }
   }
 
   async function connectWorld() {
@@ -240,18 +256,71 @@
   }
 
   async function persistPosition(position) {
-    if (!state.client || !state.character || !position) return false;
+    if (!state.client || !state.user || !state.character || !position) return false;
     const x = Math.round(Number(position.x));
     const y = Math.round(Number(position.y));
     if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
     const { error } = await state.client.from("characters").update({
       x, y, updated_at: new Date().toISOString()
-    }).eq("id", state.character.id);
+    }).eq("id", state.character.id).eq("user_id", state.user.id);
     if (error) {
       console.warn("Falha ao salvar posição:", error.message);
       return false;
     }
+    state.character = { ...state.character, x, y };
     state.lastPersistAt = Date.now();
+    return true;
+  }
+
+  async function flushProgress() {
+    if (state.progressSaveTimer) {
+      clearTimeout(state.progressSaveTimer);
+      state.progressSaveTimer = null;
+    }
+    if (state.progressSaving || !state.pendingProgress) return false;
+    state.progressSaving = true;
+    let saved = true;
+    try {
+      while (state.pendingProgress) {
+        const progress = state.pendingProgress;
+        state.pendingProgress = null;
+        const { data, error } = await state.client.from("characters").update({
+          level: progress.level,
+          hp: progress.hp,
+          max_hp: progress.max_hp,
+          xp: progress.xp,
+          updated_at: new Date().toISOString()
+        }).eq("id", state.character.id)
+          .eq("user_id", state.user.id)
+          .select("id")
+          .maybeSingle();
+        if (error || !data) {
+          console.warn("Falha ao salvar progressão:", error?.message || "Personagem não encontrado.");
+          saved = false;
+          break;
+        }
+        state.character = { ...state.character, ...progress };
+      }
+    } finally {
+      state.progressSaving = false;
+      if (state.pendingProgress && !state.progressSaveTimer) {
+        state.progressSaveTimer = setTimeout(() => flushProgress(), 900);
+      }
+    }
+    return saved;
+  }
+
+  function saveProgress(progress, options = {}) {
+    if (!state.client || !state.user || !state.character || !progress) return false;
+    const level = Math.max(1, Math.floor(Number(progress.level) || 1));
+    const maxHp = Math.max(1, Math.floor(Number(progress.max_hp) || 100));
+    const hp = Math.min(maxHp, Math.max(0, Math.floor(Number(progress.hp) || 0)));
+    const xp = Math.min(level * 100 - 1, Math.max(0, Math.floor(Number(progress.xp) || 0)));
+    state.pendingProgress = { level, hp, max_hp: maxHp, xp };
+    if (state.progressSaveTimer) clearTimeout(state.progressSaveTimer);
+    state.progressSaveTimer = null;
+    if (options.immediate) return flushProgress();
+    state.progressSaveTimer = setTimeout(() => flushProgress(), 700);
     return true;
   }
 
@@ -289,6 +358,7 @@
   }
 
   async function logout() {
+    await flushProgress();
     await saveCurrentPosition();
     if (state.channel) await state.client.removeChannel(state.channel);
     await state.client.auth.signOut();
@@ -315,9 +385,15 @@
     $("character-form").addEventListener("submit", createCharacter);
     $("logout-btn").addEventListener("click", logout);
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") saveCurrentPosition();
+      if (document.visibilityState === "hidden") {
+        flushProgress();
+        saveCurrentPosition();
+      }
     });
-    window.addEventListener("pagehide", () => saveCurrentPosition());
+    window.addEventListener("pagehide", () => {
+      flushProgress();
+      saveCurrentPosition();
+    });
     setMode("login");
 
     state.client.auth.getSession().then(({ data, error }) => {
@@ -337,6 +413,12 @@
     });
   }
 
-  window.AetheriaBackend = { sendPosition, saveCurrentPosition, isOnline: () => state.connected };
+  window.AetheriaBackend = {
+    sendPosition,
+    saveCurrentPosition,
+    saveProgress,
+    flushProgress,
+    isOnline: () => state.connected
+  };
   document.addEventListener("DOMContentLoaded", init);
 })();
