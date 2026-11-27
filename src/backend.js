@@ -356,7 +356,9 @@
   }
 
   async function getRegionalBossState() {
-    return invokeProgressAction("boss_state");
+    const result=await invokeProgressAction("boss_state");
+    if(result?.ok&&result.character)window.AetheriaWorld?.loadProgress?.(result.character);
+    return result;
   }
 
   async function hitRegionalBoss() {
