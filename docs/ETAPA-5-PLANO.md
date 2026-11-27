@@ -40,10 +40,14 @@ Escopo desta subetapa:
 ### 5.3 — Experiência do jogador
 **Status: em andamento.**
 
-Escopo:
-- Tornar os controles mais claros e fáceis de consultar.
-- Melhorar a comunicação acessível dos estados e mensagens do jogo.
-- Refinar pequenos detalhes de interface sem alterar regras, progressão ou persistência.
+Implementado para teste:
+- Legenda de controles com teclas destacadas, incluindo movimento, corrida, ataque, interação, bolsa e fechamento de janelas.
+- Legenda responsiva para telas menores.
+- Mensagens de feedback anunciadas por região acessível (`aria-live`) sem apagar a legenda de controles.
+- Estado de conexão e contagem de jogadores com anúncios acessíveis.
+- Identificação da versão 5.3 no cabeçalho.
+
+Escopo restante: testar a leitura visual da legenda em desktop e celular, mensagens de ações, diálogos, bolsa e fluxo de autenticação; corrigir qualquer regressão relatada pelo usuário.
 
 ### 5.4 — Revisão e deploy
 **Status: não iniciada.**
