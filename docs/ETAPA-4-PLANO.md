@@ -2,7 +2,7 @@
 
 ## Status
 
-**Planejamento aprovado pelo usuário em 2026-11-27.** A implementação ainda não foi iniciada. Cada subetapa deverá ser iniciada somente após confirmação explícita do usuário.
+**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 4.1 foi implementada e publicada, aguardando validação no navegador. As subetapas seguintes ainda não foram iniciadas.
 
 ## Objetivo
 
@@ -22,11 +22,13 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 ### 4.1 — NPCs e diálogos
 
-- Interação com NPCs usando a tecla E.
-- Interface de diálogo.
-- NPCs com nomes, funções e personalidade.
-- Primeiro NPC introdutório para orientar o jogador pelo mundo.
-- Interações acessíveis e compatíveis com teclado e telas menores.
+**Status: implementação publicada, aguardando validação do usuário.**
+
+- [x] Interação com NPCs usando a tecla E.
+- [x] Interface de diálogo com botão de fechar e suporte a E/Esc.
+- [x] NPCs com nomes, funções e personalidade (Mira, Ferreiro e Guarda).
+- [x] NPC introdutório com orientação sobre vila, monstros e arena.
+- [x] Interações acessíveis e compatíveis com teclado e telas menores.
 
 ### 4.2 — Sistema de missões
 
