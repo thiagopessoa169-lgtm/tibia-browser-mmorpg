@@ -4,7 +4,7 @@ const TILE=32, MAP_W=72, MAP_H=48, WORLD_W=MAP_W*TILE, WORLD_H=MAP_H*TILE;
 class WorldScene extends Phaser.Scene {
   constructor(){super("WorldScene")}
   create(data={}){
-    this.mapId=data.mapId==="bosque-antigo"?"bosque-antigo":"aetheria-village";
+    this.mapId=["bosque-antigo","ruinas-elyndor"].includes(data.mapId)?data.mapId:"aetheria-village";
     this.mapTransitioning=false;
     this.createTextures(); this.drawWorld(); this.createPlayer(); if(Number.isFinite(data.x)&&Number.isFinite(data.y))this.player.setPosition(data.x,data.y); this.createVillagers(); this.createHerbNodes(); this.createMonsters(); this.createPortals();
     this.cameras.main.setBounds(0,0,WORLD_W,WORLD_H);
@@ -58,12 +58,13 @@ class WorldScene extends Phaser.Scene {
     // Monstros não bloqueiam fisicamente o jogador: evita prendê-lo quando cercado.
     this.physics.add.overlap(this.player,this.monsters);
     this.physics.add.collider(this.monsters,this.obstacles);
-    const regionName=this.mapId==="bosque-antigo"?"BOSQUE ANTIGO":"VILA DE AETHERIA";
+    const regionName=this.mapId==="bosque-antigo"?"BOSQUE ANTIGO":this.mapId==="ruinas-elyndor"?"RUÍNAS DE ELYNDOR":"VILA DE AETHERIA";
+    const regionSubtitle=this.mapId==="bosque-antigo"?"Uma floresta esquecida...":this.mapId==="ruinas-elyndor"?"Pedras antigas guardam ecos de outra era...":"Uma nova jornada começa...";
     this.add.text(18,18,regionName,{fontFamily:"Georgia,serif",fontSize:"13px",color:"#e7e0b9",stroke:"#17251d",strokeThickness:4,letterSpacing:2}).setScrollFactor(0).setDepth(1000);
-    this.add.text(18,39,this.mapId==="bosque-antigo"?"Uma floresta esquecida...":"Uma nova jornada começa...",{fontFamily:"Arial",fontSize:"10px",color:"#c0d0b9",stroke:"#17251d",strokeThickness:3}).setScrollFactor(0).setDepth(1000);
+    this.add.text(18,39,regionSubtitle,{fontFamily:"Arial",fontSize:"10px",color:"#c0d0b9",stroke:"#17251d",strokeThickness:3}).setScrollFactor(0).setDepth(1000);
     this.remotePlayers = new Map();
     this.locationLabel = document.querySelector(".location-card strong");
-    if(this.locationLabel)this.locationLabel.textContent=this.mapId==="bosque-antigo"?"Bosque Antigo":"Vila de Aetheria";
+    if(this.locationLabel)this.locationLabel.textContent=this.mapId==="bosque-antigo"?"Bosque Antigo":this.mapId==="ruinas-elyndor"?"Ruínas de Elyndor":"Vila de Aetheria";
     this.dialoguePanel=document.getElementById("npc-dialogue");
     this.dialogueTitle=document.getElementById("npc-dialogue-title");
     this.dialogueText=document.getElementById("npc-dialogue-text");
@@ -85,7 +86,7 @@ class WorldScene extends Phaser.Scene {
         );
       },
       loadMap: (mapId,x,y,progress) => {
-        const nextMap=mapId==="bosque-antigo"?"bosque-antigo":"aetheria-village";
+        const nextMap=["bosque-antigo","ruinas-elyndor"].includes(mapId)?mapId:"aetheria-village";
         if(nextMap===this.mapId){this.player.setPosition(Phaser.Math.Clamp(x,16,WORLD_W-16),Phaser.Math.Clamp(y,16,WORLD_H-16));return;}
         this.scene.restart({mapId:nextMap,x,y,progress});
       },
@@ -127,24 +128,33 @@ class WorldScene extends Phaser.Scene {
     g.clear();g.fillStyle(0xe4c99a,1);g.fillCircle(16,8,6);g.fillStyle(0x547ba0,1);g.fillRoundedRect(9,14,14,14,4);g.fillStyle(0x293c34,1);g.fillRect(11,25,4,6);g.fillRect(18,25,4,6);g.generateTexture("player",TILE,TILE);
     g.clear();g.fillStyle(0xe2c18b,1);g.fillCircle(16,8,6);g.fillStyle(0x9a7048,1);g.fillRoundedRect(8,14,16,14,4);g.fillStyle(0x3d3429,1);g.fillRect(11,25,4,6);g.fillRect(18,25,4,6);g.generateTexture("villager",TILE,TILE);
     g.clear();g.fillStyle(0x527b45,1);g.fillEllipse(16,20,27,20);g.fillStyle(0x789b55,1);g.fillEllipse(16,17,20,16);g.fillStyle(0xf2e8bd,1);g.fillCircle(11,16,3);g.fillCircle(21,16,3);g.fillStyle(0x24352a,1);g.fillCircle(11,16,1.4);g.fillCircle(21,16,1.4);g.generateTexture("slime",TILE,TILE);
-    g.clear();g.lineStyle(3,0x315b37,1);g.lineBetween(16,27,13,10);g.lineBetween(16,27,20,8);g.lineBetween(16,27,25,14);g.fillStyle(0x8fc16d,1);g.fillEllipse(10,13,10,5);g.fillEllipse(20,10,10,5);g.fillEllipse(24,16,9,5);g.fillStyle(0xd8e9a0,1);g.fillCircle(16,25,3);g.generateTexture("herb",TILE,TILE);g.destroy();
+    g.clear();g.lineStyle(3,0x315b37,1);g.lineBetween(16,27,13,10);g.lineBetween(16,27,20,8);g.lineBetween(16,27,25,14);g.fillStyle(0x8fc16d,1);g.fillEllipse(10,13,10,5);g.fillEllipse(20,10,10,5);g.fillEllipse(24,16,9,5);g.fillStyle(0xd8e9a0,1);g.fillCircle(16,25,3);g.generateTexture("herb",TILE,TILE);
+    g.clear();g.fillStyle(0x655d57,1);g.fillRect(4,3,24,29);g.fillStyle(0x918575,1);g.fillRect(7,5,18,23);g.fillStyle(0x403c3b,1);g.fillRect(11,10,10,18);g.fillStyle(0xb0a28a,.7);g.fillRect(8,7,4,3);g.generateTexture("ruin-pillar",TILE,TILE);
+    g.clear();g.fillStyle(0x4b5554,1);g.fillRoundedRect(2,8,28,22,3);g.fillStyle(0x777d70,1);g.fillRect(5,5,22,8);g.fillStyle(0x343e3d,1);g.fillRect(9,15,14,15);g.generateTexture("ruin-wall",TILE,TILE);
+    g.clear();g.fillStyle(0x244d55,.8);g.fillTriangle(16,2,29,27,3,27);g.fillStyle(0x78c8c0,1);g.fillTriangle(16,5,24,24,8,24);g.fillStyle(0xd1f5cb,.9);g.fillTriangle(16,9,19,21,13,21);g.generateTexture("ruin-crystal",TILE,TILE);
+    g.destroy();
   }
   drawWorld(){
     this.obstacles=this.physics.add.staticGroup();
-    for(let y=0;y<MAP_H;y++)for(let x=0;x<MAP_W;x++){const n=(x*17+y*31+x*y*7)%4;const tile=this.add.image(x*TILE+16,y*TILE+16,"grass"+n).setDepth(y*TILE);if(this.mapId==="bosque-antigo")tile.setTint(0x788b69)}
-    if(this.mapId==="bosque-antigo"){for(let x=3;x<69;x++)this.add.image(x*TILE+16,24*TILE+16,"path").setTint(0x8b8060).setDepth(24*TILE+1);for(let y=7;y<42;y++)this.add.image(36*TILE+16,y*TILE+16,"path").setTint(0x8b8060).setDepth(y*TILE+1)}else{for(let x=7;x<65;x++)this.add.image(x*TILE+16,24*TILE+16,"path").setDepth(24*TILE+1);for(let y=8;y<40;y++)this.add.image(36*TILE+16,y*TILE+16,"path").setDepth(y*TILE+1);for(let y=21;y<28;y++)for(let x=33;x<40;x++)this.add.image(x*TILE+16,y*TILE+16,"path").setDepth(y*TILE+2)}
+    for(let y=0;y<MAP_H;y++)for(let x=0;x<MAP_W;x++){const n=(x*17+y*31+x*y*7)%4;const tile=this.add.image(x*TILE+16,y*TILE+16,"grass"+n).setDepth(y*TILE);if(this.mapId==="bosque-antigo")tile.setTint(0x788b69);else if(this.mapId==="ruinas-elyndor")tile.setTint(0x777b80)}
+    if(this.mapId==="bosque-antigo"){for(let x=3;x<69;x++)this.add.image(x*TILE+16,24*TILE+16,"path").setTint(0x8b8060).setDepth(24*TILE+1);for(let y=7;y<42;y++)this.add.image(36*TILE+16,y*TILE+16,"path").setTint(0x8b8060).setDepth(y*TILE+1)}
+    else if(this.mapId==="ruinas-elyndor"){for(let x=4;x<68;x++)this.add.image(x*TILE+16,24*TILE+16,"path").setTint(0x77766d).setDepth(24*TILE+1);for(let y=6;y<43;y++)this.add.image(36*TILE+16,y*TILE+16,"path").setTint(0x77766d).setDepth(y*TILE+1);for(let y=21;y<28;y++)for(let x=33;x<40;x++)this.add.image(x*TILE+16,y*TILE+16,"path").setTint(0x99917b).setDepth(y*TILE+2)}
+    else{for(let x=7;x<65;x++)this.add.image(x*TILE+16,24*TILE+16,"path").setDepth(24*TILE+1);for(let y=8;y<40;y++)this.add.image(36*TILE+16,y*TILE+16,"path").setDepth(y*TILE+1);for(let y=21;y<28;y++)for(let x=33;x<40;x++)this.add.image(x*TILE+16,y*TILE+16,"path").setDepth(y*TILE+2)}
     const villageProps=[[15,17,"house"],[20,17,"house"],[52,17,"house"],[57,17,"house"],[15,31,"house"],[20,31,"house"],[52,31,"house"],[57,31,"house"],[10,10,"tree"],[13,8,"tree"],[24,9,"tree"],[47,9,"tree"],[61,10,"tree"],[8,37,"tree"],[13,39,"tree"],[25,38,"tree"],[47,39,"tree"],[63,37,"tree"],[29,15,"rock"],[43,14,"rock"],[29,33,"rock"],[44,34,"rock"]];
     const forestProps=[[8,8,"tree"],[13,12,"tree"],[20,7,"tree"],[27,11,"tree"],[45,8,"tree"],[53,12,"tree"],[63,8,"tree"],[9,37,"tree"],[18,40,"tree"],[27,36,"tree"],[45,39,"tree"],[56,36,"tree"],[65,39,"tree"],[18,20,"rock"],[27,29,"rock"],[48,19,"rock"],[57,29,"rock"]];
-    const props=this.mapId==="bosque-antigo"?forestProps:villageProps;
-    props.forEach(([x,y,key])=>{const obj=this.add.image(x*TILE+16,y*TILE+16,key).setDepth(y*TILE+20);if(key==="house"||key==="rock")this.obstacles.add(obj);if(key==="tree"){const trunk=this.add.rectangle(x*TILE+16,y*TILE+24,9,12,0x4c3828).setDepth(y*TILE+1);this.obstacles.add(trunk);obj.setDepth(y*TILE+40)}});
+    const ruinProps=[[9,10,"ruin-pillar"],[16,10,"ruin-wall"],[23,10,"ruin-pillar"],[49,10,"ruin-pillar"],[56,10,"ruin-wall"],[63,10,"ruin-pillar"],[9,38,"ruin-pillar"],[16,38,"ruin-wall"],[23,38,"ruin-pillar"],[49,38,"ruin-pillar"],[56,38,"ruin-wall"],[63,38,"ruin-pillar"],[20,18,"rock"],[52,18,"rock"],[20,31,"rock"],[52,31,"rock"],[30,17,"ruin-crystal"],[42,31,"ruin-crystal"],[34,8,"ruin-crystal"],[38,40,"ruin-crystal"]];
+    const props=this.mapId==="bosque-antigo"?forestProps:this.mapId==="ruinas-elyndor"?ruinProps:villageProps;
+    props.forEach(([x,y,key])=>{const obj=this.add.image(x*TILE+16,y*TILE+16,key).setDepth(y*TILE+20);if(["house","rock","ruin-wall","ruin-pillar","ruin-crystal"].includes(key))this.obstacles.add(obj);if(key==="tree"){const trunk=this.add.rectangle(x*TILE+16,y*TILE+24,9,12,0x4c3828).setDepth(y*TILE+1);this.obstacles.add(trunk);obj.setDepth(y*TILE+40)}});
     this.obstacles.refresh();
     this.add.graphics().lineStyle(8,0x2d4b37,.9).strokeRect(2,2,WORLD_W-4,WORLD_H-4).setDepth(WORLD_H+10);
-    if(this.mapId==="aetheria-village"){const arenaX=31*TILE,arenaY=35*TILE,arenaW=12*TILE,arenaH=9*TILE;const arena=this.add.graphics().setDepth(4);arena.fillStyle(0x294b68,.34).fillRect(arenaX,arenaY,arenaW,arenaH);arena.lineStyle(5,0xa7d5e8,.95).strokeRect(arenaX,arenaY,arenaW,arenaH);this.add.text(arenaX+arenaW/2,arenaY+18,"ARENA DE AETHERIA",{fontFamily:"Georgia,serif",fontSize:"16px",color:"#e2f4ff",stroke:"#17334a",strokeThickness:5,letterSpacing:2}).setOrigin(.5).setDepth(8);}else{const clearing=this.add.graphics().setDepth(4);clearing.fillStyle(0x293d2d,.42).fillEllipse(36*TILE+16,24*TILE+16,420,300);this.add.text(36*TILE+16,14*TILE,"BOSQUE ANTIGO",{fontFamily:"Georgia,serif",fontSize:"18px",color:"#e0e8c3",stroke:"#263523",strokeThickness:5,letterSpacing:2}).setOrigin(.5).setDepth(8);}
+    if(this.mapId==="aetheria-village"){const arenaX=31*TILE,arenaY=35*TILE,arenaW=12*TILE,arenaH=9*TILE;const arena=this.add.graphics().setDepth(4);arena.fillStyle(0x294b68,.34).fillRect(arenaX,arenaY,arenaW,arenaH);arena.lineStyle(5,0xa7d5e8,.95).strokeRect(arenaX,arenaY,arenaW,arenaH);this.add.text(arenaX+arenaW/2,arenaY+18,"ARENA DE AETHERIA",{fontFamily:"Georgia,serif",fontSize:"16px",color:"#e2f4ff",stroke:"#17334a",strokeThickness:5,letterSpacing:2}).setOrigin(.5).setDepth(8);}
+    else if(this.mapId==="bosque-antigo"){const clearing=this.add.graphics().setDepth(4);clearing.fillStyle(0x293d2d,.42).fillEllipse(36*TILE+16,24*TILE+16,420,300);this.add.text(36*TILE+16,14*TILE,"BOSQUE ANTIGO",{fontFamily:"Georgia,serif",fontSize:"18px",color:"#e0e8c3",stroke:"#263523",strokeThickness:5,letterSpacing:2}).setOrigin(.5).setDepth(8);}
+    else{const plaza=this.add.graphics().setDepth(4);plaza.fillStyle(0x3c4a4b,.5).fillCircle(36*TILE+16,24*TILE+16,190);plaza.lineStyle(5,0x9b9a82,.8).strokeCircle(36*TILE+16,24*TILE+16,155);this.add.text(36*TILE+16,18*TILE,"SANTUÁRIO ESQUECIDO",{fontFamily:"Georgia,serif",fontSize:"18px",color:"#d7d3b8",stroke:"#303b3b",strokeThickness:5,letterSpacing:2}).setOrigin(.5).setDepth(8);}
   }
   createPlayer(){this.player=this.physics.add.sprite(36*TILE+16,24*TILE+16,"player");this.player.setDepth(this.player.y+30).setCollideWorldBounds(true);this.player.body.setSize(17,17).setOffset(7,12);this.player.speed=145}
   createVillagers(){
     this.villagers=this.physics.add.staticGroup();
-    const characters=this.mapId==="bosque-antigo"?[{x:39,y:22,name:"Eldrin",role:"Guardião do Bosque",dialogue:"Poucos viajantes encontram o caminho até aqui.\n\nO Bosque Antigo guarda trilhas esquecidas e criaturas mais resistentes. Explore com cuidado e volte à vila pelo portal ao oeste."}]:[
+    const characters=this.mapId==="ruinas-elyndor"?[]:this.mapId==="bosque-antigo"?[{x:39,y:22,name:"Eldrin",role:"Guardião do Bosque",dialogue:"Poucos viajantes encontram o caminho até aqui.\n\nO Bosque Antigo guarda trilhas esquecidas e criaturas mais resistentes. Explore com cuidado e volte à vila pelo portal ao oeste."}]:[
       {x:33,y:22,name:"Mira",role:"Guia de Aetheria",questKey:"slime_hunt",dialogue:"Bem-vindo à Vila de Aetheria!\n\nOs Lodos da Floresta estão se aproximando das estradas. Você pode ajudar a vila derrotando três deles?\n\nAceite a missão para registrar seu progresso e receber uma recompensa."},
       {x:40,y:26,name:"Ferreiro",role:"Mestre das ferramentas",questKey:"herb_gathering",dialogue:"Saudações, aventureiro! Estou precisando de ervas silvestres para preparar suprimentos.\n\nEncontre e recolha três ervas espalhadas pela vila. Elas ficam marcadas no chão.\n\nAceite a tarefa para começar."},
       {x:31,y:27,name:"Guarda",role:"Sentinela da vila",dialogue:"Atenção, aventureiro! A vila é uma zona segura.\n\nOs duelos entre jogadores são permitidos somente dentro da Arena de Aetheria, ao sul. Fique atento aos seus arredores e mantenha sua vida em dia."}
@@ -165,7 +175,7 @@ class WorldScene extends Phaser.Scene {
   }
 
   createHerbNodes(){
-    const nodes=this.mapId==="bosque-antigo"?[]:[
+    const nodes=this.mapId!=="aetheria-village"?[]:[
       {key:"herb_01",x:27,y:19},
       {key:"herb_02",x:45,y:20},
       {key:"herb_03",x:25,y:32}
@@ -303,7 +313,7 @@ class WorldScene extends Phaser.Scene {
   }
   createMonsters(){
     this.monsters = this.physics.add.group();
-    this.monsterSpawns=this.mapId==="bosque-antigo"?[
+    this.monsterSpawns=this.mapId==="ruinas-elyndor"?[]:this.mapId==="bosque-antigo"?[
       {x:22*TILE+16,y:13*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7},{x:49*TILE+16,y:14*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7},{x:17*TILE+16,y:33*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7},{x:58*TILE+16,y:32*TILE+16,name:"Lodo Ancestral",hp:105,xp:40,damage:10,tint:0x9c83b7}
     ]:[
       {x:24*TILE+16,y:13*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:48*TILE+16,y:14*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:13*TILE+16,y:29*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true},{x:60*TILE+16,y:30*TILE+16,name:"Lodo da Floresta",hp:70,xp:25,damage:7,questTracked:true}
@@ -340,27 +350,48 @@ class WorldScene extends Phaser.Scene {
     monster.nameLabel.setPosition(monster.x,monster.y-27).setDepth(monster.y+50);
   }
   createPortals(){
-    // Os portais ficam diretamente sobre a estrada para evitar áreas difíceis de alcançar.
-    const data=this.mapId==="bosque-antigo"
-      ?{x:8*TILE+16,y:24*TILE+16,target:"aetheria-village",targetX:60*TILE+16,targetY:24*TILE+16,label:"Portal para a Vila"}
-      :{x:63*TILE+16,y:24*TILE+16,target:"bosque-antigo",targetX:10*TILE+16,targetY:24*TILE+16,label:"Portal para o Bosque"};
-    const ring=this.add.circle(data.x,data.y,25,0x78b7c4,.22).setStrokeStyle(4,0x9de2d9,.95).setDepth(data.y+20);
-    const core=this.add.circle(data.x,data.y,14,0x9de2d9,.38).setStrokeStyle(2,0xd6fff1,.9).setDepth(data.y+21);
-    this.tweens.add({targets:[ring,core],alpha:.45,duration:900,yoyo:true,repeat:-1});
-    const label=this.add.text(data.x,data.y-42,data.label,{fontFamily:"Arial",fontSize:"11px",color:"#e0fff2",stroke:"#18352e",strokeThickness:4}).setOrigin(.5).setDepth(data.y+30);
-    const hitArea=this.add.zone(data.x,data.y,150,150).setOrigin(.5).setDepth(data.y+40).setInteractive({useHandCursor:true});
-    this.portal={...data,ring,core,label,hitArea};
-    this.portalHint=this.add.text(data.x,data.y+42,"CLIQUE perto ou pressione E",{fontFamily:"Arial",fontSize:"11px",color:"#fff0b0",stroke:"#263523",strokeThickness:3}).setOrigin(.5).setDepth(data.y+41).setVisible(false);
-    // O clique no canvas também funciona: não depende de acertar exatamente o círculo.
+    const definitions=this.mapId==="aetheria-village"?[
+      {x:63,y:24,target:"bosque-antigo",targetX:10,targetY:24,label:"Portal para o Bosque"},
+      {x:36,y:9,target:"ruinas-elyndor",targetX:36,targetY:40,label:"Portal para as Ruínas"}
+    ]:this.mapId==="bosque-antigo"?[
+      {x:8,y:24,target:"aetheria-village",targetX:60,targetY:24,label:"Portal para a Vila"},
+      {x:63,y:24,target:"ruinas-elyndor",targetX:10,targetY:24,label:"Portal para as Ruínas"}
+    ]:[
+      {x:8,y:24,target:"bosque-antigo",targetX:60,targetY:24,label:"Portal para o Bosque"}
+    ];
+    this.portals=definitions.map((entry)=>{
+      const data={x:entry.x*TILE+16,y:entry.y*TILE+16,target:entry.target,targetX:entry.targetX*TILE+16,targetY:entry.targetY*TILE+16,label:entry.label};
+      const ring=this.add.circle(data.x,data.y,25,0x78b7c4,.22).setStrokeStyle(4,0x9de2d9,.95).setDepth(data.y+20);
+      const core=this.add.circle(data.x,data.y,14,0x9de2d9,.38).setStrokeStyle(2,0xd6fff1,.9).setDepth(data.y+21);
+      this.tweens.add({targets:[ring,core],alpha:.45,duration:900,yoyo:true,repeat:-1});
+      const label=this.add.text(data.x,data.y-42,data.label,{fontFamily:"Arial",fontSize:"11px",color:"#e0fff2",stroke:"#18352e",strokeThickness:4}).setOrigin(.5).setDepth(data.y+30);
+      const hint=this.add.text(data.x,data.y+42,"E · viajar",{fontFamily:"Arial",fontSize:"11px",color:"#fff0b0",stroke:"#263523",strokeThickness:3}).setOrigin(.5).setDepth(data.y+41).setVisible(false);
+      return {...data,ring,core,label,hint};
+    });
     this.input.on("pointerdown",()=>{
       if(this.mapTransitioning||this.dialogueOpen||this.inventoryOpen)return;
-      const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,data.x,data.y);
-      if(distance<=160)this.transitionMap();
-      else this.showCombatMessage("Chegue mais perto do portal para viajar.");
+      const portal=this.findNearbyPortal();
+      if(portal)this.transitionMap(portal);
     });
   }
-  findNearbyPortal(){if(!this.portal)return false;const near=Phaser.Math.Distance.Between(this.player.x,this.player.y,this.portal.x,this.portal.y)<=160;this.portalHint?.setVisible(near&&!this.mapTransitioning&&!this.dialogueOpen&&!this.inventoryOpen);return near?this.portal:null;}
-  async transitionMap(){const portal=this.portal;if(!portal||this.mapTransitioning)return;if(Phaser.Math.Distance.Between(this.player.x,this.player.y,portal.x,portal.y)>160){this.showCombatMessage("Chegue mais perto do portal para viajar.");return;}this.mapTransitioning=true;this.player.setVelocity(0,0);this.showCombatMessage("Atravessando o portal...");const result=await window.AetheriaBackend?.changeMap?.(portal.target,portal.targetX,portal.targetY);if(!result?.ok){this.mapTransitioning=false;this.showCombatMessage(result?.message||"Não foi possível viajar agora.");return;}this.scene.restart({mapId:portal.target,x:portal.targetX,y:portal.targetY,progress:{level:this.playerLevel,hp:this.playerHp,max_hp:this.playerMaxHp,xp:this.playerXp}});}
+  findNearbyPortal(){
+    let nearest=null,distanceLimit=160;
+    (this.portals||[]).forEach((portal)=>{
+      const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,portal.x,portal.y);
+      if(distance<distanceLimit){distanceLimit=distance;nearest=portal;}
+      portal.hint?.setVisible(false);
+    });
+    if(nearest&&!this.mapTransitioning&&!this.dialogueOpen&&!this.inventoryOpen)nearest.hint?.setVisible(true);
+    return nearest;
+  }
+  async transitionMap(portal=this.findNearbyPortal()){
+    if(!portal||this.mapTransitioning)return;
+    if(Phaser.Math.Distance.Between(this.player.x,this.player.y,portal.x,portal.y)>160){this.showCombatMessage("Chegue mais perto do portal para viajar.");return;}
+    this.mapTransitioning=true;this.player.setVelocity(0,0);this.showCombatMessage("Atravessando o portal...");
+    const result=await window.AetheriaBackend?.changeMap?.(portal.target,portal.targetX,portal.targetY);
+    if(!result?.ok){this.mapTransitioning=false;this.showCombatMessage(result?.message||"Não foi possível viajar agora.");return;}
+    this.scene.restart({mapId:portal.target,x:portal.targetX,y:portal.targetY,progress:{level:this.playerLevel,hp:this.playerHp,max_hp:this.playerMaxHp,xp:this.playerXp}});
+  }
   isInArena(x,y){if(this.mapId!=="aetheria-village")return false;
     return x>=31*TILE+16 && x<=42*TILE+16
       && y>=35*TILE+16 && y<=43*TILE+16;
@@ -666,7 +697,7 @@ class WorldScene extends Phaser.Scene {
     const inArena=this.isInArena(this.player.x,this.player.y);
     if(inArena!==this.wasInArena){
       this.wasInArena=inArena;
-      if(this.locationLabel) this.locationLabel.textContent=inArena?"Arena de Aetheria":"Vila de Aetheria";
+      if(this.locationLabel) this.locationLabel.textContent=inArena?"Arena de Aetheria":this.mapId==="bosque-antigo"?"Bosque Antigo":this.mapId==="ruinas-elyndor"?"Ruínas de Elyndor":"Vila de Aetheria";
       this.showCombatMessage(inArena
         ? "Você entrou na arena. O duelo está liberado!"
         : "Você saiu da arena. A vila é uma zona segura.");
