@@ -2,7 +2,7 @@
 
 ## Status
 
-**Planejamento aprovado pelo usuário em 2026-11-27.** As subetapas 4.1, 4.2 e 4.3 foram aprovadas. A subetapa 4.4 está em implementação.
+**Status: concluída e aprovada pelo usuário em 2026-11-27.** As quatro subetapas foram testadas e aprovadas.
 
 ## Objetivo
 
@@ -63,8 +63,9 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 - [x] Nova região explorável: Bosque Antigo.
 - [x] Portais de ida e volta com persistência de região e posição.
 - [x] Criaturas e NPC próprios da nova região.
-- [ ] Testes de transição, reconexão, multiplayer e regressão.
-- [ ] Publicação e validação do usuário.
+- [x] Testes de transição e validação da persistência de região.
+- [x] Correção de permissão para atualizar mapa e posição, preservando RLS.
+- [x] Publicação e aprovação do usuário.
 
 ## Critérios de aceitação
 
@@ -80,7 +81,7 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 1. 4.1 — NPCs e diálogos (aprovada).
 2. 4.2 — Missões (aprovada).
-3. 4.3 — Inventário e equipamentos (aguardando validação).
-4. 4.4 — Expansão do mundo (não iniciada).
+3. 4.3 — Inventário e equipamentos (aprovada).
+4. 4.4 — Expansão do mundo (aprovada).
 
 Cada subetapa exige autorização para iniciar e validação do usuário antes da próxima.
