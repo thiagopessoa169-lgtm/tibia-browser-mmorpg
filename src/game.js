@@ -132,6 +132,8 @@ class WorldScene extends Phaser.Scene {
     g.clear();g.fillStyle(0x655d57,1);g.fillRect(4,3,24,29);g.fillStyle(0x918575,1);g.fillRect(7,5,18,23);g.fillStyle(0x403c3b,1);g.fillRect(11,10,10,18);g.fillStyle(0xb0a28a,.7);g.fillRect(8,7,4,3);g.generateTexture("ruin-pillar",TILE,TILE);
     g.clear();g.fillStyle(0x4b5554,1);g.fillRoundedRect(2,8,28,22,3);g.fillStyle(0x777d70,1);g.fillRect(5,5,22,8);g.fillStyle(0x343e3d,1);g.fillRect(9,15,14,15);g.generateTexture("ruin-wall",TILE,TILE);
     g.clear();g.fillStyle(0x244d55,.8);g.fillTriangle(16,2,29,27,3,27);g.fillStyle(0x78c8c0,1);g.fillTriangle(16,5,24,24,8,24);g.fillStyle(0xd1f5cb,.9);g.fillTriangle(16,9,19,21,13,21);g.generateTexture("ruin-crystal",TILE,TILE);
+    g.clear();g.fillStyle(0x59636a,1);g.fillCircle(16,17,13);g.fillStyle(0x929b9b,1);g.fillCircle(16,13,9);g.fillStyle(0x283e43,1);g.fillCircle(12,14,2);g.fillCircle(20,14,2);g.fillStyle(0x9fe1d2,1);g.fillCircle(12,14,1);g.fillCircle(20,14,1);g.generateTexture("stone-sentinel",TILE,TILE);
+    g.clear();g.fillStyle(0x364f68,.75);g.fillEllipse(16,18,22,26);g.fillStyle(0x8fc8d8,.9);g.fillEllipse(16,14,12,17);g.fillStyle(0xd7f6ef,1);g.fillCircle(12,14,2);g.fillCircle(20,14,2);g.generateTexture("rune-wisp",TILE,TILE);
     g.destroy();
   }
   drawWorld(){
@@ -326,10 +328,10 @@ class WorldScene extends Phaser.Scene {
     this.monsterSpawns.forEach((spawn,index)=>this.spawnMonster(spawn,index));
   }
   spawnMonster(spawn,index){
-    const monster=this.monsters.create(spawn.x,spawn.y,"slime");
+    const monster=this.monsters.create(spawn.x,spawn.y,spawn.texture||"slime");
     monster.setDepth(monster.y+25).setCollideWorldBounds(true);
     monster.body.setSize(24,18).setOffset(4,12);
-    monster.hp=spawn.hp||70;monster.maxHp=monster.hp;monster.speed=this.mapId==="bosque-antigo"?68:58;monster.xpReward=spawn.xp||25;monster.attackDamage=spawn.damage||7;monster.questTracked=Boolean(spawn.questTracked);monster.regionId=this.mapId;if(spawn.tint)monster.setTint(spawn.tint);
+    monster.hp=spawn.hp||70;monster.maxHp=monster.hp;monster.speed=spawn.speed||(this.mapId==="bosque-antigo"?68:58);monster.aggroRange=spawn.aggro||210;monster.xpReward=spawn.xp||25;monster.attackDamage=spawn.damage||7;monster.questTracked=Boolean(spawn.questTracked);monster.regionId=this.mapId;monster.enemyType=spawn.texture||"slime";if(spawn.tint)monster.setTint(spawn.tint);
     monster.homeX=spawn.x; monster.homeY=spawn.y; monster.spawnIndex=index;
     monster.nextAttackAt=0; monster.patrolPhase=index*1.7;
     monster.name=spawn.name;
@@ -588,7 +590,7 @@ class WorldScene extends Phaser.Scene {
       if(!monster.active)return;
       const dx=this.player.x-monster.x,dy=this.player.y-monster.y;
       const distance=Math.hypot(dx,dy)||1;
-      if(distance<210){
+      if(distance<(monster.aggroRange||210)){
         if(distance>29){
           monster.setVelocity(dx/distance*monster.speed,dy/distance*monster.speed);
         }else{
@@ -604,9 +606,10 @@ class WorldScene extends Phaser.Scene {
           }
         }
       }else{
-        const phase=time/900+monster.patrolPhase;
-        const targetX=monster.homeX+Math.cos(phase)*34;
-        const targetY=monster.homeY+Math.sin(phase)*24;
+        const phase=time/(monster.enemyType==="rune-wisp"?620:900)+monster.patrolPhase;
+        const patrolRadius=monster.enemyType==="rune-wisp"?48:34;
+        const targetX=monster.homeX+Math.cos(phase)*patrolRadius;
+        const targetY=monster.homeY+Math.sin(phase)*(monster.enemyType==="rune-wisp"?34:24);
         const px=targetX-monster.x,py=targetY-monster.y,plen=Math.hypot(px,py)||1;
         if(Math.hypot(px,py)>5)monster.setVelocity(px/plen*monster.speed*.38,py/plen*monster.speed*.38);
         else monster.setVelocity(0,0);
