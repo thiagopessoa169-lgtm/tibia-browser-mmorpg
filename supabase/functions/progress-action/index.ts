@@ -84,6 +84,28 @@ Deno.serve(async (req: Request) => {
   }
 
   const mapId = String(character.map_id ?? "");
+  if (action === "boss_state") {
+    if (mapId !== "ruinas-elyndor") return json({ok:false,message:"O chefe só pode ser localizado nas Ruínas de Elyndor."},403,origin);
+    const state = await admin.rpc("elyndor_boss_get_state");
+    if (state.error) return json({ok:false,message:"Não foi possível consultar o chefe."},500,origin);
+    return json({ok:true,boss:state.data},200,origin);
+  }
+  if (action === "boss_hit") {
+    const result = await admin.rpc("elyndor_boss_hit",{p_character_id:characterId});
+    if (result.error) return json({ok:false,message:"Não foi possível registrar sua participação no chefe."},500,origin);
+    const data = result.data ?? {ok:false,message:"Ação não confirmada."};
+    if (data.ok && Number(data.reward_xp) > 0) {
+      const refreshed = await admin.from("characters").select("level,xp,hp,max_hp")
+        .eq("id",characterId).eq("user_id",authData.user.id).maybeSingle();
+      if (refreshed.data) data.character = refreshed.data;
+    }
+    return json(data,200,origin);
+  }
+  if (action === "boss_strike") {
+    const result = await admin.rpc("elyndor_boss_strike",{p_character_id:characterId});
+    if (result.error) return json({ok:false,message:"Não foi possível validar o ataque do chefe."},500,origin);
+    return json(result.data ?? {ok:false,message:"Ação não confirmada."},200,origin);
+  }
   const spawns = SPAWNS[mapId];
   const spawnIndex = Number(body.spawn_index);
   if (!spawns || !Number.isInteger(spawnIndex) || spawnIndex < 0 || spawnIndex >= spawns.length) {
