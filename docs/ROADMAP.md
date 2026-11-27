@@ -30,4 +30,13 @@
 - [x] 5.3 Experiência do jogador.
 - [x] 5.4 Revisão, correção de progressão, auditoria de permissões e deploy.
 
-Cada subetapa foi implementada, publicada para teste e aprovada pelo usuário. Limitações conhecidas e melhorias futuras estão registradas em `docs/ETAPA-5-PLANO.md`.
+## Etapa 6 — Expansão do mundo e novos desafios
+**Status: planejamento aprovado pelo usuário em 2026-11-27; execução ainda não iniciada.**
+- [ ] 6.1 Terceira região explorável.
+- [ ] 6.2 Novos monstros e comportamento.
+- [ ] 6.3 Chefe regional.
+- [ ] 6.4 Missões e NPCs da nova região.
+- [ ] 6.5 Recompensas e equipamentos.
+- [ ] 6.6 Multiplayer e balanceamento dos desafios.
+
+Consulte [o plano da Etapa 5](ETAPA-5-PLANO.md) para auditoria e limitações conhecidas, e [o plano da Etapa 6](ETAPA-6-PLANO.md) para o escopo da expansão.
