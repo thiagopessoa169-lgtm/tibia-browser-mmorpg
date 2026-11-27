@@ -426,13 +426,15 @@ class WorldScene extends Phaser.Scene {
       this.showCombatMessage("Você foi derrotado! Retornando à vila...");
       this.time.delayedCall(2200,()=>{
         this.player.setPosition(36*TILE+16,24*TILE+16).clearTint();
-        this.playerHp=this.playerMaxHp;this.playerRespawning=false;
+        this.playerHp=this.playerMaxHp;
         if(this.mapId!=="aetheria-village"){
           Promise.resolve(window.AetheriaBackend?.changeMap?.("aetheria-village",36*TILE+16,24*TILE+16)).then(result=>{
             if(result?.ok)this.scene.restart({mapId:"aetheria-village",x:36*TILE+16,y:24*TILE+16,progress:{level:this.playerLevel,hp:this.playerHp,max_hp:this.playerMaxHp,xp:this.playerXp}});
+            else{this.playerRespawning=false;this.player.setPosition(6*TILE+16,24*TILE+16);this.showCombatMessage("Não foi possível retornar à vila. Tente o portal novamente.");}
           });
           return;
         }
+        this.playerRespawning=false;
         this.updatePlayerHud();
         window.AetheriaBackend?.saveProgress?.({
           level: this.playerLevel, hp: this.playerHp,
