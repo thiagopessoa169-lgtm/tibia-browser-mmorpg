@@ -34,10 +34,15 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - Evitar mudanças nas criaturas e recompensas já aprovadas.
 
 ### 6.3 — Chefe regional
-- Criar um chefe original com barra de vida, fases e ataques especiais legíveis.
-- Controlar dano, recompensas e intervalo de reaparecimento no servidor.
-- Evitar que jogadores fora da região ou sem participação válida recebam recompensas.
-- Testar combate em grupo e reconexão.
+**Status: implementada e aguardando teste/aprovação do usuário.**
+- Guardião de Elyndor na praça central, com 2.400 HP e barra de vida sincronizada entre jogadores.
+- Duas fases: a segunda começa abaixo de 50% de vida; o impacto rúnico fica mais intenso e causa mais dano.
+- Ataque do jogador e dano recebido passam pela Edge Function `progress-action` e RPCs com bloqueio de linha e cooldown no banco.
+- Ataque especial com círculo de aviso e janela para sair da área antes do impacto.
+- Participantes válidos que acertaram o chefe recentemente e permanecem vivos na região recebem 220 XP quando o chefe é derrotado.
+- Reaparecimento global após cinco minutos; PvP continua restrito à Arena de Aetheria.
+- Tabelas privadas com RLS e sem acesso direto de `anon`/ `authenticated`; operações executadas pelo servidor.
+- Testar ataque, esquiva, mudança de fase, derrota, recompensa em grupo, reconexão e reaparecimento antes de aprovar.
 
 ### 6.4 — Missões e NPCs da nova região
 - Adicionar NPCs e diálogos próprios.
