@@ -17,7 +17,8 @@
     pendingProgress: null,
     progressSaving: false,
     progressSavePromise: null,
-    mode: "login"
+    mode: "login",
+    questData: null
   };
 
   const $ = (id) => document.getElementById(id);
@@ -192,6 +193,7 @@
     $("player-name").textContent = character.name;
     $("player-level").textContent = "Nível " + level + " · Aventureiro";
     await connectWorld();
+    await loadQuests();
     // Se a sessão terminou durante a tela de derrota, retoma no ponto seguro.
     if (defeated) {
       await saveProgress({ level, hp, max_hp: maxHp, xp }, { immediate: true });
@@ -410,6 +412,98 @@
     return data || { ok: false, message: "O servidor não confirmou o duelo." };
   }
 
+
+  async function invokeQuestAction(action, extra = {}) {
+    if (!state.client || !state.character || !state.user) {
+      return { ok: false, message: "Entre no jogo para usar as missões." };
+    }
+    const { data, error } = await state.client.functions.invoke("quest-action", {
+      body: { action, character_id: state.character.id, ...extra }
+    });
+    if (error) {
+      console.warn("[Aetheria] Falha no sistema de missões:", error.message);
+      return { ok: false, message: error.message || "Não foi possível conectar ao diário." };
+    }
+    if (data?.character) {
+      state.character = { ...state.character, ...data.character };
+      window.AetheriaWorld?.loadProgress?.(data.character);
+    }
+    return data || { ok: false, message: "O servidor não confirmou a ação." };
+  }
+
+  function renderQuestPanel(data) {
+    const list = $("quest-list");
+    if (!list) return;
+    list.replaceChildren();
+    const labels = {
+      slime_hunt: "Limpeza da estrada",
+      herb_gathering: "Ervas para a oficina"
+    };
+    const quests = Array.isArray(data?.quests) ? data.quests : [];
+    if (!quests.length) {
+      const empty = document.createElement("p");
+      empty.className = "quest-empty";
+      empty.textContent = "Converse com Mira ou com o Ferreiro para receber sua primeira missão.";
+      list.append(empty);
+    } else {
+      quests.forEach((quest) => {
+        const item = document.createElement("div");
+        item.className = "quest-entry" + (quest.status === "completed" ? " is-completed" : "");
+        const title = document.createElement("strong");
+        title.textContent = labels[quest.quest_key] || "Missão";
+        const progress = document.createElement("span");
+        progress.textContent = quest.status === "completed"
+          ? "Concluída"
+          : Math.min(quest.progress, quest.target) + " / " + quest.target + " objetivos";
+        item.append(title, progress);
+        list.append(item);
+      });
+    }
+    const items = Array.isArray(data?.items) ? data.items : [];
+    if (items.length) {
+      const rewards = document.createElement("p");
+      rewards.className = "quest-rewards";
+      rewards.textContent = "Materiais recebidos: " + items.map((item) =>
+        (item.item_key === "medicinal_herb" ? "Erva medicinal" : "Essência de lodo") + " ×" + item.quantity
+      ).join(" · ");
+      list.append(rewards);
+    }
+  }
+
+  async function loadQuests() {
+    const result = await invokeQuestAction("list");
+    if (!result?.ok) {
+      console.warn("[Aetheria] Diário indisponível:", result?.message);
+      return result;
+    }
+    state.questData = result;
+    renderQuestPanel(result);
+    window.AetheriaWorld?.loadQuestData?.(result);
+    return result;
+  }
+
+  async function acceptQuest(questKey) {
+    const result = await invokeQuestAction("accept", { quest_key: questKey });
+    if (result?.ok) await loadQuests();
+    return result;
+  }
+
+  async function collectHerb(nodeKey) {
+    const result = await invokeQuestAction("collect_herb", { node_key: nodeKey });
+    if (result?.ok) await loadQuests();
+    return result;
+  }
+
+  async function recordSlimeDefeat(spawnIndex) {
+    const result = await invokeQuestAction("record_slime_defeat", { spawn_index: spawnIndex });
+    if (result?.ok && result.tracked !== false) await loadQuests();
+    return result;
+  }
+
+  function getQuestState(questKey) {
+    return state.questData?.quests?.find((quest) => quest.quest_key === questKey) || null;
+  }
+
   async function logout() {
     await flushProgress();
     await saveCurrentPosition();
@@ -420,6 +514,8 @@
     await state.client.auth.signOut();
     state.user = null;
     state.character = null;
+    state.questData = null;
+    renderQuestPanel(null);
     state.connected = false;
     if (statusLabel) statusLabel.textContent = "Mundo local";
     showAuth();
@@ -475,6 +571,11 @@
     saveProgress,
     flushProgress,
     attackPlayer,
+    loadQuests,
+    acceptQuest,
+    collectHerb,
+    recordSlimeDefeat,
+    getQuestState,
     isOnline: () => state.connected
   };
   document.addEventListener("DOMContentLoaded", init);
