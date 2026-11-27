@@ -368,6 +368,7 @@ class WorldScene extends Phaser.Scene {
     boss.nameLabel.setText(boss.defeated?"GUARDIÃO DERROTADO":"GUARDIÃO DE ELYNDOR");
     boss.sprite.setAlpha(boss.defeated ? .35 : 1);
     boss.aura.setVisible(!boss.defeated);
+    if(boss.defeated){boss.telegraph?.setVisible(false);boss.attackPending=false;}
   }
   async syncRegionalBoss(){
     const boss=this.regionalBoss;if(!boss||!this.scene.isActive())return;
