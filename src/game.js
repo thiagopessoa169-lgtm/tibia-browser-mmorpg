@@ -4,7 +4,7 @@ const TILE=32, MAP_W=72, MAP_H=48, WORLD_W=MAP_W*TILE, WORLD_H=MAP_H*TILE;
 class WorldScene extends Phaser.Scene {
   constructor(){super("WorldScene")}
   create(){
-    this.createTextures(); this.drawWorld(); this.createPlayer(); this.createVillagers(); this.createMonsters();
+    this.createTextures(); this.drawWorld(); this.createPlayer(); this.createVillagers(); this.createHerbNodes(); this.createMonsters();
     this.cameras.main.setBounds(0,0,WORLD_W,WORLD_H);
     this.cameras.main.startFollow(this.player,true,.085,.085); this.cameras.main.setZoom(1.25);
     this.cursors=this.input.keyboard.createCursorKeys();
@@ -56,7 +56,10 @@ class WorldScene extends Phaser.Scene {
     this.dialoguePanel=document.getElementById("npc-dialogue");
     this.dialogueTitle=document.getElementById("npc-dialogue-title");
     this.dialogueText=document.getElementById("npc-dialogue-text");
+    this.questAcceptButton=document.getElementById("npc-quest-accept");
     this.dialogueOpen=false;
+    this.currentNpcQuestKey=null;
+    if(this.questAcceptButton)this.questAcceptButton.addEventListener("click",()=>this.acceptCurrentQuest());
     const dialogueClose=document.getElementById("npc-dialogue-close");
     if(dialogueClose)dialogueClose.addEventListener("click",()=>this.closeNpcDialog());
     if(this.dialoguePanel)this.dialoguePanel.hidden=true;
@@ -72,6 +75,7 @@ class WorldScene extends Phaser.Scene {
       updateRemotePlayer: (data) => this.updateRemotePlayer(data),
       syncRemotePlayers: (players) => this.syncRemotePlayers(players),
       applyServerHp: (hp) => this.applyServerHp(hp),
+      loadQuestData: (data) => this.loadQuestData(data),
       loadProgress: (progress) => {
         this.playerLevel = Math.max(1, Math.floor(Number(progress?.level) || 1));
         this.playerMaxHp = Math.max(1, Math.floor(Number(progress?.max_hp) || 100));
@@ -97,7 +101,8 @@ class WorldScene extends Phaser.Scene {
     g.clear();g.fillStyle(0x806044,1);g.fillRect(2,10,28,20);g.fillStyle(0x9b7950,1);g.fillRect(0,6,32,8);g.fillStyle(0x604a36,1);g.fillRect(12,18,8,12);g.fillStyle(0x4d6d54,1);g.fillRect(4,8,24,4);g.generateTexture("house",TILE,TILE);
     g.clear();g.fillStyle(0xe4c99a,1);g.fillCircle(16,8,6);g.fillStyle(0x547ba0,1);g.fillRoundedRect(9,14,14,14,4);g.fillStyle(0x293c34,1);g.fillRect(11,25,4,6);g.fillRect(18,25,4,6);g.generateTexture("player",TILE,TILE);
     g.clear();g.fillStyle(0xe2c18b,1);g.fillCircle(16,8,6);g.fillStyle(0x9a7048,1);g.fillRoundedRect(8,14,16,14,4);g.fillStyle(0x3d3429,1);g.fillRect(11,25,4,6);g.fillRect(18,25,4,6);g.generateTexture("villager",TILE,TILE);
-    g.clear();g.fillStyle(0x527b45,1);g.fillEllipse(16,20,27,20);g.fillStyle(0x789b55,1);g.fillEllipse(16,17,20,16);g.fillStyle(0xf2e8bd,1);g.fillCircle(11,16,3);g.fillCircle(21,16,3);g.fillStyle(0x24352a,1);g.fillCircle(11,16,1.4);g.fillCircle(21,16,1.4);g.generateTexture("slime",TILE,TILE);g.destroy();
+    g.clear();g.fillStyle(0x527b45,1);g.fillEllipse(16,20,27,20);g.fillStyle(0x789b55,1);g.fillEllipse(16,17,20,16);g.fillStyle(0xf2e8bd,1);g.fillCircle(11,16,3);g.fillCircle(21,16,3);g.fillStyle(0x24352a,1);g.fillCircle(11,16,1.4);g.fillCircle(21,16,1.4);g.generateTexture("slime",TILE,TILE);
+    g.clear();g.lineStyle(3,0x315b37,1);g.lineBetween(16,27,13,10);g.lineBetween(16,27,20,8);g.lineBetween(16,27,25,14);g.fillStyle(0x8fc16d,1);g.fillEllipse(10,13,10,5);g.fillEllipse(20,10,10,5);g.fillEllipse(24,16,9,5);g.fillStyle(0xd8e9a0,1);g.fillCircle(16,25,3);g.generateTexture("herb",TILE,TILE);g.destroy();
   }
   drawWorld(){
     this.obstacles=this.physics.add.staticGroup();
@@ -122,8 +127,8 @@ class WorldScene extends Phaser.Scene {
   createVillagers(){
     this.villagers=this.physics.add.staticGroup();
     const characters=[
-      {x:33,y:22,name:"Mira",role:"Guia de Aetheria",dialogue:"Bem-vindo à Vila de Aetheria, viajante!\n\nEste lugar é um refúgio para aventureiros. Explore os arredores, enfrente os Lodos da Floresta e fortaleça seu personagem.\n\nQuando quiser testar suas habilidades contra outros jogadores, procure a Arena de Aetheria, ao sul. Aqui na vila, você está em segurança."},
-      {x:40,y:26,name:"Ferreiro",role:"Mestre das ferramentas",dialogue:"Saudações! Trabalho com ferramentas e equipamentos para quem se aventura além das muralhas.\n\nAinda estou organizando minha oficina. Em breve, poderemos conversar sobre armas, armaduras e melhorias."},
+      {x:33,y:22,name:"Mira",role:"Guia de Aetheria",questKey:"slime_hunt",dialogue:"Bem-vindo à Vila de Aetheria!\n\nOs Lodos da Floresta estão se aproximando das estradas. Você pode ajudar a vila derrotando três deles?\n\nAceite a missão para registrar seu progresso e receber uma recompensa."},
+      {x:40,y:26,name:"Ferreiro",role:"Mestre das ferramentas",questKey:"herb_gathering",dialogue:"Saudações, aventureiro! Estou precisando de ervas silvestres para preparar suprimentos.\n\nEncontre e recolha três ervas espalhadas pela vila. Elas ficam marcadas no chão.\n\nAceite a tarefa para começar."},
       {x:31,y:27,name:"Guarda",role:"Sentinela da vila",dialogue:"Atenção, aventureiro! A vila é uma zona segura.\n\nOs duelos entre jogadores são permitidos somente dentro da Arena de Aetheria, ao sul. Fique atento aos seus arredores e mantenha sua vida em dia."}
     ];
     characters.forEach((data)=>{
@@ -140,6 +145,98 @@ class WorldScene extends Phaser.Scene {
       }).setOrigin(.5).setDepth(npc.y+51).setVisible(false);
     });
   }
+
+  createHerbNodes(){
+    const nodes=[
+      {key:"herb_01",x:27,y:19},
+      {key:"herb_02",x:45,y:20},
+      {key:"herb_03",x:25,y:32}
+    ];
+    this.herbNodes=nodes.map((data)=>{
+      const x=data.x*TILE+16,y=data.y*TILE+16;
+      const sprite=this.add.image(x,y,"herb").setDepth(y+22);
+      const label=this.add.text(x,y-20,"Erva silvestre",{
+        fontFamily:"Arial",fontSize:"9px",color:"#e0f0b5",
+        stroke:"#263523",strokeThickness:3
+      }).setOrigin(.5).setDepth(y+50);
+      const hint=this.add.text(x,y-34,"E · coletar",{
+        fontFamily:"Arial",fontSize:"9px",color:"#fff0b0",
+        stroke:"#263523",strokeThickness:3
+      }).setOrigin(.5).setDepth(y+51).setVisible(false);
+      return {...data,x,y,sprite,label,hint,collected:false,collecting:false};
+    });
+  }
+  loadQuestData(data){
+    const collected=new Set(data?.collected_nodes||[]);
+    (this.herbNodes||[]).forEach((node)=>{
+      if(collected.has(node.key)){
+        node.collected=true;
+        node.sprite.destroy();node.label.destroy();node.hint.destroy();
+      }
+    });
+    this.refreshNpcQuestButton();
+  }
+  findNearbyHerb(){
+    let nearest=null,distanceLimit=52;
+    (this.herbNodes||[]).forEach((node)=>{
+      if(node.collected||!node.sprite.active)return;
+      const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,node.x,node.y);
+      if(distance<distanceLimit){distanceLimit=distance;nearest=node;}
+    });
+    (this.herbNodes||[]).forEach((node)=>{
+      if(node.hint?.active)node.hint.setVisible(node===nearest&&!this.dialogueOpen);
+    });
+    return nearest;
+  }
+  interactWithHerb(){
+    const node=this.findNearbyHerb();
+    if(!node||node.collecting)return false;
+    node.collecting=true;
+    this.showCombatMessage("Registrando coleta...");
+    Promise.resolve(window.AetheriaBackend?.collectHerb?.(node.key)).then((result)=>{
+      node.collecting=false;
+      if(!result?.ok){
+        this.showCombatMessage(result?.message||"Não foi possível coletar a erva.");
+        return;
+      }
+      node.collected=true;
+      node.sprite.destroy();node.label.destroy();node.hint.destroy();
+      this.showCombatMessage(result.completed_now
+        ? "Missão concluída! Recompensa registrada."
+        : "Erva coletada! Progresso salvo.");
+    }).catch(()=>{
+      node.collecting=false;
+      this.showCombatMessage("Não foi possível conectar ao diário.");
+    });
+    return true;
+  }
+  refreshNpcQuestButton(){
+    if(!this.questAcceptButton||!this.currentNpcQuestKey)return;
+    const quest=window.AetheriaBackend?.getQuestState?.(this.currentNpcQuestKey);
+    if(quest?.status==="completed"){
+      this.questAcceptButton.textContent="Missão concluída";
+      this.questAcceptButton.disabled=true;
+    }else if(quest?.status==="active"){
+      this.questAcceptButton.textContent="Missão aceita";
+      this.questAcceptButton.disabled=true;
+    }else{
+      this.questAcceptButton.textContent="Aceitar missão";
+      this.questAcceptButton.disabled=false;
+    }
+  }
+  async acceptCurrentQuest(){
+    if(!this.currentNpcQuestKey)return;
+    this.questAcceptButton.disabled=true;
+    this.questAcceptButton.textContent="Registrando...";
+    const result=await window.AetheriaBackend?.acceptQuest?.(this.currentNpcQuestKey);
+    if(result?.ok){
+      this.showCombatMessage(result.already_accepted?"Você já aceitou esta missão.":"Missão aceita! Confira seu diário.");
+    }else{
+      this.showCombatMessage(result?.message||"Não foi possível aceitar a missão.");
+    }
+    this.refreshNpcQuestButton();
+  }
+
   findNearbyNpc(){
     let nearest=null,distanceLimit=62;
     this.villagers.getChildren().forEach((npc)=>{
@@ -156,6 +253,11 @@ class WorldScene extends Phaser.Scene {
     if(!npc?.npcData)return;
     this.dialogueOpen=true;
     const data=npc.npcData;
+    this.currentNpcQuestKey=data.questKey||null;
+    if(this.questAcceptButton){
+      this.questAcceptButton.hidden=!this.currentNpcQuestKey;
+      this.refreshNpcQuestButton();
+    }
     if(this.dialogueTitle)this.dialogueTitle.textContent=data.name+" · "+data.role;
     if(this.dialogueText)this.dialogueText.textContent=data.dialogue;
     if(this.dialoguePanel)this.dialoguePanel.hidden=false;
@@ -166,12 +268,13 @@ class WorldScene extends Phaser.Scene {
   }
   closeNpcDialog(){
     this.dialogueOpen=false;
+    this.currentNpcQuestKey=null;
+    if(this.questAcceptButton)this.questAcceptButton.hidden=true;
     if(this.dialoguePanel)this.dialoguePanel.hidden=true;
   }
   interactWithNpc(){
     const npc=this.findNearbyNpc();
     if(npc){this.openNpcDialog(npc);return true;}
-    this.showCombatMessage("Nenhum NPC por perto.");
     return false;
   }
   createMonsters(){
@@ -261,6 +364,13 @@ class WorldScene extends Phaser.Scene {
       target.nameLabel.destroy();target.hpBar.destroy();target.destroy();
       this.gainExperience(25);
       this.showCombatMessage("+25 XP");
+      Promise.resolve(window.AetheriaBackend?.flushProgress?.())
+        .then(()=>window.AetheriaBackend?.recordSlimeDefeat?.(index))
+        .then(result=>{
+          if(result?.ok&&result.completed_now)this.showCombatMessage("Missão concluída! Recompensa registrada.");
+          else if(result?.ok&&result.tracked!==false)this.showCombatMessage("Progresso da missão atualizado: "+result.progress+" / "+result.target+".");
+        })
+        .catch(()=>console.warn("[Aetheria] Não foi possível atualizar a missão de caça."));
       this.time.delayedCall(7000,()=>{if(this.scene.isActive())this.spawnMonster(this.monsterSpawns[index],index);});
     }
   }
@@ -440,8 +550,10 @@ class WorldScene extends Phaser.Scene {
     }
     if(Phaser.Input.Keyboard.JustDown(this.keys.E)){
       if(this.interactWithNpc())return;
+      if(this.interactWithHerb())return;
     }
     this.findNearbyNpc();
+    this.findNearbyHerb();
     const inArena=this.isInArena(this.player.x,this.player.y);
     if(inArena!==this.wasInArena){
       this.wasInArena=inArena;
