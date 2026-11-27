@@ -2,7 +2,7 @@
 
 ## Status
 
-**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 4.1 foi implementada e publicada, aguardando validação no navegador. As subetapas seguintes ainda não foram iniciadas.
+**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 4.1 foi aprovada. A subetapa 4.2 foi implementada e publicada, aguardando validação. As subetapas 4.3 e 4.4 ainda não foram iniciadas.
 
 ## Objetivo
 
@@ -22,7 +22,7 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 ### 4.1 — NPCs e diálogos
 
-**Status: implementação publicada, aguardando validação do usuário.**
+**Status: aprovada pelo usuário.**
 
 - [x] Interação com NPCs usando a tecla E.
 - [x] Interface de diálogo com botão de fechar e suporte a E/Esc.
@@ -32,11 +32,17 @@ Expandir Aetheria Online com personagens não jogáveis, missões, itens/equipam
 
 ### 4.2 — Sistema de missões
 
-- Missões iniciais de coleta e combate.
-- Objetivos, progresso e estados (disponível, ativa, concluída).
-- Recompensas em XP e itens.
-- Lista de missões ativas e concluídas.
-- Persistência e validação de progresso no Supabase.
+**Status: implementação publicada, aguardando validação do usuário.**
+
+- [x] Missão de combate: derrotar três Lodos da Floresta.
+- [x] Missão de coleta: recolher três ervas em pontos fixos da vila.
+- [x] Aceitação de missões com Mira e Ferreiro.
+- [x] Diário com objetivos ativos e concluídos.
+- [x] Progresso, eventos únicos de coleta e recompensas validados no servidor.
+- [x] Recompensas de XP e materiais registradas no banco para integração ao inventário da Etapa 4.3.
+- [x] Migração SQL e Edge Function `quest-action` com autenticação obrigatória.
+
+**Limite de segurança conhecido:** a posição do personagem e o combate PvE básico ainda são simulados no cliente nesta versão. O servidor verifica a posição persistida, proximidade dos pontos de coleta/surgimento e intervalos por surgimento, além de controlar progresso e recompensas. Isso reduz duplicações e concessões diretas pelo cliente, mas ainda não constitui anti-cheat completo; a autoridade total de movimento e combate fica fora do escopo desta subetapa.
 
 ### 4.3 — Inventário e equipamentos
 
