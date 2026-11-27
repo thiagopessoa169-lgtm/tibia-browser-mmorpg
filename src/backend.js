@@ -173,7 +173,7 @@
     const hp = Math.min(maxHp, Math.max(0, Math.floor(Number(character.hp) || 0)));
     const xp = Math.min(level * 100 - 1, Math.max(0, Math.floor(Number(character.xp) || 0)));
     state.character = { ...character, level, hp, max_hp: maxHp, xp };
-    state.mapId = character.map_id === "bosque-antigo" ? "bosque-antigo" : "aetheria-village";
+    state.mapId = ["bosque-antigo","ruinas-elyndor"].includes(character.map_id) ? character.map_id : "aetheria-village";
 
     if (hp <= 0) {
       const restored = await respawnCharacter();
@@ -205,7 +205,7 @@
     state.lastY = y;
     state.lastPersistAt = 0;
     state.lastBroadcastAt = 0;
-    state.mapId = current.map_id === "bosque-antigo" ? "bosque-antigo" : "aetheria-village";
+    state.mapId = ["bosque-antigo","ruinas-elyndor"].includes(current.map_id) ? current.map_id : "aetheria-village";
     window.AetheriaWorld?.loadMap?.(state.mapId, x, y, { level: currentLevel, hp: currentHp, max_hp: currentMaxHp, xp: currentXp });
     window.AetheriaWorld?.loadProgress?.({ level: currentLevel, hp: currentHp, max_hp: currentMaxHp, xp: currentXp });
     $("player-name").textContent = current.name;
@@ -301,7 +301,7 @@
     const x = Math.round(Number(position.x));
     const y = Math.round(Number(position.y));
     if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
-    const mapId=state.character.map_id==="bosque-antigo"?"bosque-antigo":"aetheria-village";
+    const mapId=["aetheria-village","bosque-antigo","ruinas-elyndor"].includes(state.character.map_id)?state.character.map_id:"aetheria-village";
     const { error } = await state.client.from("characters").update({x,y,map_id:mapId,updated_at:new Date().toISOString()}).eq("id",state.character.id).eq("user_id",state.user.id);
     if (error) {
       console.warn("Falha ao salvar posição:", error.message);
@@ -392,7 +392,7 @@
   }
 
   async function changeMap(mapId,x,y){
-    if(!state.client||!state.character||!state.user)return {ok:false,message:"Entre no jogo para viajar."};const destination=mapId==="bosque-antigo"?"bosque-antigo":mapId==="aetheria-village"?"aetheria-village":null;const px=Math.round(Number(x)),py=Math.round(Number(y));if(!destination||!Number.isFinite(px)||!Number.isFinite(py)||px<16||px>2288||py<16||py>1520)return {ok:false,message:"Destino inválido."};
+    if(!state.client||!state.character||!state.user)return {ok:false,message:"Entre no jogo para viajar."};const destination=["aetheria-village","bosque-antigo","ruinas-elyndor"].includes(mapId)?mapId:null;const px=Math.round(Number(x)),py=Math.round(Number(y));if(!destination||!Number.isFinite(px)||!Number.isFinite(py)||px<16||px>2288||py<16||py>1520)return {ok:false,message:"Destino inválido."};
     const {data,error}=await state.client.from("characters").update({map_id:destination,x:px,y:py,updated_at:new Date().toISOString()}).eq("id",state.character.id).eq("user_id",state.user.id).select("id,map_id,x,y").maybeSingle();if(error||!data)return {ok:false,message:"Não foi possível salvar a região: "+(error?.message||"personagem não encontrado.")};state.character={...state.character,map_id:destination,x:px,y:py};state.mapId=destination;state.lastX=px;state.lastY=py;state.lastPersistAt=Date.now();if(state.channel)await state.channel.track({user_id:state.user.id,character_id:state.character.id,name:state.character.name,x:px,y:py,map_id:destination});return {ok:true,map_id:destination};
   }
 
