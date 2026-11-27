@@ -24,3 +24,7 @@
 .character-choice span{font-size:10px;font-weight:400;margin-top:3px}
 [hidden]{display:none!important}
 @media(max-width:600px){.account-panel{padding:11px}.auth-form,.character-form{align-items:stretch;flex-direction:column}.auth-form label,.character-form label{min-width:0}.auth-actions{flex-wrap:wrap}.account-bar{gap:9px}}
+
+/* Etapa 3.1 — barra de experiência */
+.xp-track{height:4px;width:130px;background:#34463b;border-radius:8px;margin:4px 0 2px;overflow:hidden}.xp-track i{display:block;width:0;height:100%;background:#91b9df;transition:width .15s ease}
+@media(max-width:600px){.xp-track{width:90px}}
