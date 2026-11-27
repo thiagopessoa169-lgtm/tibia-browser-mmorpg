@@ -28,3 +28,15 @@
 /* Etapa 3.1 — barra de experiência */
 .xp-track{height:4px;width:130px;background:#34463b;border-radius:8px;margin:4px 0 2px;overflow:hidden}.xp-track i{display:block;width:0;height:100%;background:#91b9df;transition:width .15s ease}
 @media(max-width:600px){.xp-track{width:90px}}
+
+
+/* Etapa 4.1 — diálogos com NPCs */
+.npc-dialogue{position:absolute;z-index:20;left:50%;bottom:58px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));padding:16px 18px;background:linear-gradient(145deg,#1b3028f5,#101d19f5);border:1px solid #a5b88a;border-radius:12px;box-shadow:0 14px 42px #0009;color:#edf3e8;backdrop-filter:blur(8px)}
+.npc-dialogue-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #71866a66;padding-bottom:9px}
+.npc-dialogue-kicker{font-size:9px;letter-spacing:2px;color:#b8cb91}
+.npc-dialogue h2{font:600 17px Georgia,serif;color:#eadcae;margin:3px 0 0}
+.npc-dialogue p{font-size:12px;line-height:1.65;white-space:pre-line;color:#d7e2d5;margin:12px 0}
+.npc-dialogue small{font-size:9px;color:#9eb09e}
+.npc-dialogue-close{width:30px;height:30px;border:1px solid #71866a;border-radius:7px;background:#263d31;color:#edf3e8;font-size:22px;line-height:1;cursor:pointer}
+.npc-dialogue-close:hover{background:#385441}
+@media(max-width:600px){.npc-dialogue{bottom:48px;padding:12px 13px}.npc-dialogue h2{font-size:15px}.npc-dialogue p{font-size:11px;line-height:1.5}}
