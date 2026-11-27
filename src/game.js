@@ -36,14 +36,21 @@ class WorldScene extends Phaser.Scene {
         this.input.keyboard.enabled = !isTextField(document.activeElement);
       }
     };
-    document.addEventListener("focusin", updateKeyboardFocus);
-    document.addEventListener("focusout", () => {
-      requestAnimationFrame(updateKeyboardFocus);
-    });
-    window.addEventListener("blur", () => {
+    const updateKeyboardFocusAfterBlur = () => requestAnimationFrame(updateKeyboardFocus);
+    const disableKeyboardOnBlur = () => {
       if (this.input.keyboard) this.input.keyboard.enabled = false;
-    });
+    };
+    document.addEventListener("focusin", updateKeyboardFocus);
+    document.addEventListener("focusout", updateKeyboardFocusAfterBlur);
+    window.addEventListener("blur", disableKeyboardOnBlur);
     window.addEventListener("focus", updateKeyboardFocus);
+    // Cada troca de região reinicia a cena; remova listeners globais da cena anterior.
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      document.removeEventListener("focusin", updateKeyboardFocus);
+      document.removeEventListener("focusout", updateKeyboardFocusAfterBlur);
+      window.removeEventListener("blur", disableKeyboardOnBlur);
+      window.removeEventListener("focus", updateKeyboardFocus);
+    });
     updateKeyboardFocus();
     this.physics.world.setBounds(0,0,WORLD_W,WORLD_H);
     this.physics.add.collider(this.player,this.obstacles);
