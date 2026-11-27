@@ -18,13 +18,13 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 ## Subetapas planejadas
 
 ### 6.1 — Terceira região explorável
-**Status: planejada; aguardando início da implementação.**
-- Criar um terceiro mapa com identidade visual própria, terreno, caminhos, obstáculos e pontos de interesse.
-- Definir nome, ambientação e pontos de entrada/saída.
+**Status: implementada e publicada para teste do usuário em 2026-11-27; aguardando aprovação.**
+- Região original **Ruínas de Elyndor** (`ruinas-elyndor`), com paleta de pedra, caminhos, praça central, pilares, paredes e cristais.
+- Portais conectam Vila de Aetheria, Bosque Antigo e Ruínas de Elyndor; cada região oferece saída para outra região.
 - Criar portais de ida e volta e salvar/restaurar a região e posição do personagem.
-- Atualizar presença e filtragem de jogadores remotos para respeitar a nova região.
-- Garantir que o personagem não seja enviado para uma região inválida e que morte/renascimento continue seguro.
-- Não incluir ainda o chefe ou sistemas de missões específicos desta região; ficam para subetapas posteriores.
+- Persistência e carregamento reconhecem o terceiro identificador de mapa; presença e jogadores remotos continuam filtrados por região.
+- A Edge Function `progress-action` reconhece o novo mapa sem habilitar recompensas de combate nele. Morte/renascimento continua retornando o personagem à vila.
+- A região ainda não possui monstros, chefe, NPCs, ervas ou missões próprias; esses conteúdos permanecem nas subetapas seguintes.
 
 ### 6.2 — Novos monstros e comportamento
 - Criar novos tipos de inimigos com atributos e comportamento distintos.
