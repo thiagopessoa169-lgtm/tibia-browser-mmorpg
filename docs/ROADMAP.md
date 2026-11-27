@@ -24,10 +24,10 @@
 - [x] 4.4 Expansão do mundo: Bosque Antigo, portais e persistência de região.
 
 ## Etapa 5 — Polimento, performance e deploy
-**Status: em andamento.**
-- [x] 5.1 Polimento visual — aprovada pelo usuário em 2026-11-27.
-- [x] 5.2 Performance e estabilidade — aprovada pelo usuário em 2026-11-27.
-- [x] 5.3 Experiência do jogador — aprovada pelo usuário em 2026-11-27.
-- [ ] 5.4 Revisão e deploy — correção de progressão implementada; aguardando deployment e teste do usuário.
+**Status: concluída e aprovada pelo usuário em 2026-11-27.**
+- [x] 5.1 Polimento visual.
+- [x] 5.2 Performance e estabilidade.
+- [x] 5.3 Experiência do jogador.
+- [x] 5.4 Revisão, correção de progressão, auditoria de permissões e deploy.
 
-Cada subetapa será implementada, testada e submetida à aprovação do usuário antes de avançar.
+Cada subetapa foi implementada, publicada para teste e aprovada pelo usuário. Limitações conhecidas e melhorias futuras estão registradas em `docs/ETAPA-5-PLANO.md`.
