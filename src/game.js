@@ -412,6 +412,7 @@ class WorldScene extends Phaser.Scene {
     if(target.hp<=0){
       const index=target.spawnIndex;
       const regionId=target.regionId;
+      const xpReward=target.xpReward||25;
       const defeatPosition={x:target.x,y:target.y};
       const tracked=target.questTracked;
       target.nameLabel.destroy();target.hpBar.destroy();target.destroy();
@@ -432,8 +433,8 @@ class WorldScene extends Phaser.Scene {
           else if(result?.ok&&result.tracked!==false)this.showCombatMessage("Progresso da missão atualizado: "+result.progress+" / "+result.target+".");
         }).catch(()=>this.showCombatMessage("Não foi possível conectar ao servidor de progressão."));
       }else{
-        this.gainLocalExperience(target.xpReward||25);
-        this.showCombatMessage("+"+(target.xpReward||25)+" XP");
+        this.gainLocalExperience(xpReward);
+        this.showCombatMessage("+"+xpReward+" XP");
       }
       this.time.delayedCall(7000,()=>{if(this.scene.isActive()&&this.mapId===regionId)this.spawnMonster(this.monsterSpawns[index],index);});
     }
@@ -560,7 +561,7 @@ class WorldScene extends Phaser.Scene {
             monster.nextAttackAt=time+1050;
             const backend=window.AetheriaBackend;
             if(backend?.hasOnlineCharacter?.()){
-              backend.applyMonsterDamage?.(monster.spawnIndex).catch(()=>console.warn("[Aetheria] Não foi possível confirmar o dano do monstro."));
+              Promise.resolve(backend.applyMonsterDamage?.(monster.spawnIndex)).catch(()=>console.warn("[Aetheria] Não foi possível confirmar o dano do monstro."));
             }else{
               this.damagePlayer(monster.attackDamage||7);
             }
