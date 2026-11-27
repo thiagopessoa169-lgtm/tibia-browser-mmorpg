@@ -134,6 +134,18 @@ class WorldScene extends Phaser.Scene {
     g.clear();g.fillStyle(0x244d55,.8);g.fillTriangle(16,2,29,27,3,27);g.fillStyle(0x78c8c0,1);g.fillTriangle(16,5,24,24,8,24);g.fillStyle(0xd1f5cb,.9);g.fillTriangle(16,9,19,21,13,21);g.generateTexture("ruin-crystal",TILE,TILE);
     g.clear();g.fillStyle(0x59636a,1);g.fillCircle(16,17,13);g.fillStyle(0x929b9b,1);g.fillCircle(16,13,9);g.fillStyle(0x283e43,1);g.fillCircle(12,14,2);g.fillCircle(20,14,2);g.fillStyle(0x9fe1d2,1);g.fillCircle(12,14,1);g.fillCircle(20,14,1);g.generateTexture("stone-sentinel",TILE,TILE);
     g.clear();g.fillStyle(0x202d32,1);g.fillEllipse(32,43,56,43);g.fillStyle(0x66777a,1);g.fillRoundedRect(9,12,46,42,10);g.fillStyle(0x9da9a2,1);g.fillRoundedRect(15,4,34,29,9);g.fillStyle(0x263b40,1);g.fillTriangle(17,10,7,0,20,4);g.fillTriangle(47,10,57,0,44,4);g.fillStyle(0x91e2d8,1);g.fillCircle(24,17,4);g.fillCircle(40,17,4);g.fillStyle(0xd9fff0,1);g.fillCircle(24,17,1.5);g.fillCircle(40,17,1.5);g.fillStyle(0x3c5557,1);g.fillRect(18,34,28,7);g.fillStyle(0x82928b,1);g.fillRect(11,49,13,14);g.fillRect(40,49,13,14);g.generateTexture("elyndor-guardian",64,64);
+    // Fagulha Rúnica: espírito flutuante com núcleo luminoso e partículas.
+    g.clear();
+    g.fillStyle(0x163d49,.28);g.fillCircle(32,34,25);
+    g.fillStyle(0x2b8290,.72);g.fillTriangle(32,3,57,31,32,59);g.fillTriangle(32,3,7,31,32,59);
+    g.fillStyle(0x5bc6c8,1);g.fillCircle(32,29,17);
+    g.fillStyle(0x9ce9df,1);g.fillCircle(32,26,11);
+    g.fillStyle(0xe5fff0,1);g.fillCircle(32,23,5);
+    g.fillStyle(0xeffff4,1);g.fillCircle(26,28,2);g.fillCircle(38,28,2);
+    g.fillStyle(0x6be0dc,.9);g.fillTriangle(32,0,27,12,37,12);
+    g.fillStyle(0x9ce9df,.8);g.fillTriangle(32,63,25,49,39,49);
+    g.lineStyle(2,0xb4fff0,.85);g.strokeCircle(32,29,23);
+    g.generateTexture("rune-wisp",64,64);
     g.destroy();
   }
   drawWorld(){
