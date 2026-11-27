@@ -1,7 +1,7 @@
 # Etapa 5 — Polimento visual, performance e deploy
 
 ## Status geral
-**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 5.1 foi implementada, publicada e aprovada pelo usuário em 2026-11-27. A subetapa 5.1 foi aprovada; a 5.2 está em andamento e depende de teste do usuário antes da aprovação.
+**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 5.1 foi implementada, publicada e aprovada pelo usuário em 2026-11-27. A subetapa 5.1 foi aprovada; a 5.2 foi aprovada pelo usuário em 2026-11-27; a 5.3 está em andamento.
 
 ## Objetivo
 Refinar a apresentação e a experiência de Aetheria Online sem alterar regras de combate, progressão, inventário, missões, autenticação ou persistência já aprovadas.
@@ -23,9 +23,8 @@ Implementado e publicado:
 - Ajustes responsivos para telas menores.
 - Identificação visual da versão de polimento 5.1 no cabeçalho.
 
-## Próximas subetapas — não iniciadas
-### 5.2 — Performance e estabilidade
-**Status: em andamento em 2026-11-27.**
+## 5.2 — Performance e estabilidade
+**Status: aprovada pelo usuário em 2026-11-27.**
 
 Escopo desta subetapa:
 - Reduzir trabalho repetitivo por frame na IA dos monstros e na atualização das barras de vida.
@@ -39,9 +38,15 @@ Escopo desta subetapa:
 **Critérios de aceitação:** jogo inicia e troca de região sem erros; monstros continuam patrulhando, perseguindo e atacando; barras de vida continuam corretas após receber dano; movimento e combate do jogador permanecem responsivos; multiplayer e salvamento continuam funcionando.
 
 ### 5.3 — Experiência do jogador
-Feedback de ações, indicadores, controles, menus e mensagens.
+**Status: em andamento.**
+
+Escopo:
+- Tornar os controles mais claros e fáceis de consultar.
+- Melhorar a comunicação acessível dos estados e mensagens do jogo.
+- Refinar pequenos detalhes de interface sem alterar regras, progressão ou persistência.
 
 ### 5.4 — Revisão e deploy
+**Status: não iniciada.**
 Testes finais de produção, integração Supabase, permissões e acesso em diferentes computadores.
 
 ## Regra de avanço
