@@ -1,6 +1,6 @@
 # Aetheria Online — MMORPG 2D para navegador
 
-Protótipo de MMORPG 2D top-down. As Etapas 1, 2, 3, 4 e 5 foram concluídas e aprovadas pelo usuário. O planejamento da Etapa 6 foi aprovado em 2026-11-27; a implementação ainda não começou.
+Protótipo de MMORPG 2D top-down. As Etapas 1, 2, 3, 4 e 5 foram concluídas e aprovadas pelo usuário. O planejamento da Etapa 6 foi aprovado em 2026-11-27; a subetapa 6.1 (Ruínas de Elyndor) foi implementada e publicada para teste.
 
 ## Executar
 
@@ -33,6 +33,6 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 3. Combate, monstros, XP e PvP (aprovada; gravação dos dados de progressão protegida pelo servidor)
 4. NPCs, missões, inventário e expansão do mundo (aprovada)
 5. Polimento visual, performance, experiência do jogador, revisão e deploy (concluída e aprovada)
-6. Expansão do mundo e novos desafios (planejamento aprovado; execução pendente)
+6. Expansão do mundo e novos desafios (6.1 publicada para teste; demais subetapas pendentes)
 
 Consulte [o plano da Etapa 5](docs/ETAPA-5-PLANO.md) e [o plano da Etapa 6](docs/ETAPA-6-PLANO.md) para detalhes.
