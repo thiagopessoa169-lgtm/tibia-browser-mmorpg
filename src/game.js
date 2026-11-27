@@ -320,11 +320,16 @@ class WorldScene extends Phaser.Scene {
   }
   drawMonsterBar(monster){
     if(!monster.active || !monster.hpBar) return;
-    const width=30, ratio=Phaser.Math.Clamp(monster.hp/monster.maxHp,0,1);
-    monster.hpBar.clear();
-    monster.hpBar.fillStyle(0x17251b,.9).fillRoundedRect(monster.x-width/2,monster.y-17,width,4,2);
-    monster.hpBar.fillStyle(0xb6d477,1).fillRoundedRect(monster.x-width/2,monster.y-17,width*ratio,4,2);
-    monster.hpBar.setDepth(monster.y+49);
+    const width=30;
+    // A barra usa coordenadas locais: acompanha o sprite em todo frame sem redesenhar a cada frame.
+    if(monster._barRenderedHp !== monster.hp){
+      const ratio=Phaser.Math.Clamp(monster.hp/monster.maxHp,0,1);
+      monster.hpBar.clear();
+      monster.hpBar.fillStyle(0x17251b,.9).fillRoundedRect(-width/2,-17,width,4,2);
+      monster.hpBar.fillStyle(0xb6d477,1).fillRoundedRect(-width/2,-17,width*ratio,4,2);
+      monster._barRenderedHp=monster.hp;
+    }
+    monster.hpBar.setPosition(monster.x,monster.y).setDepth(monster.y+49);
     monster.nameLabel.setPosition(monster.x,monster.y-27).setDepth(monster.y+50);
   }
   createPortals(){
@@ -496,11 +501,9 @@ class WorldScene extends Phaser.Scene {
   }
   updateMonsters(time){
     if(!this.player || this.playerRespawning)return;
-    // IA e barras são atualizadas em passos controlados, em vez de redesenhar tudo a cada frame.
+    // A IA roda em intervalos curtos; o acompanhamento visual das barras ocorre no update de cada frame.
     if(time < (this.nextMonsterAiAt || 0)) return;
     this.nextMonsterAiAt = time + 100;
-    const refreshMonsterBars = time >= (this.nextMonsterBarAt || 0);
-    if(refreshMonsterBars) this.nextMonsterBarAt = time + 250;
     this.monsters.getChildren().forEach(monster=>{
       if(!monster.active)return;
       const dx=this.player.x-monster.x,dy=this.player.y-monster.y;
@@ -524,7 +527,7 @@ class WorldScene extends Phaser.Scene {
         else monster.setVelocity(0,0);
       }
       monster.setDepth(monster.y+25);
-      if(refreshMonsterBars) this.drawMonsterBar(monster);
+
     });
   }
   updateRemotePlayer(data){
@@ -582,6 +585,8 @@ class WorldScene extends Phaser.Scene {
       remote.sprite.setPosition(nextX, nextY).setDepth(nextY + 30);
       remote.label.setPosition(nextX, nextY - 28).setDepth(nextY + 50);
     }
+    // Mantém barras e nomes alinhados ao movimento físico dos monstros em todos os frames.
+    if(this.monsters) this.monsters.getChildren().forEach(monster=>this.drawMonsterBar(monster));
     if(!this.player?.body)return;
     if(this.inventoryOpen){
       this.player.setVelocity(0,0);
