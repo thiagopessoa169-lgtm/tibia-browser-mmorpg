@@ -466,7 +466,7 @@ class WorldScene extends Phaser.Scene {
     this.time.delayedCall(1300,()=>{
       if(messageObject.active) messageObject.destroy();
       if(this.combatMessage===messageObject) this.combatMessage=null;
-      hint.textContent="WASD / Setas — mover · Shift — correr · E — conversar · Espaço — atacar";
+      hint.textContent="WASD / Setas — mover · Shift — correr · E — interagir · I — bolsa · Espaço — ação";
     });
   }
   updateMonsters(time){
