@@ -1,6 +1,6 @@
 # Aetheria Online — MMORPG 2D para navegador
 
-Protótipo de MMORPG 2D top-down. As Etapas 1, 2, 3 e 4 foram concluídas e aprovadas. As subetapas 5.1 (polimento visual), 5.2 (performance e estabilidade) e 5.3 (experiência do jogador) foram implementadas, publicadas e aprovadas pelo usuário em 2026-11-27. A revisão final 5.4 está em andamento.
+Protótipo de MMORPG 2D top-down. As Etapas 1, 2, 3, 4 e 5 foram concluídas e aprovadas pelo usuário. A Etapa 5 (polimento visual, performance, experiência do jogador, revisão de segurança e deploy) foi concluída em 2026-11-27.
 
 ## Executar
 
@@ -32,6 +32,6 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 2. Supabase Auth, personagens, PostgreSQL e Realtime (aprovada)
 3. Combate, monstros, XP e PvP (aprovada; gravação dos dados de progressão protegida pelo servidor)
 4. NPCs, missões, inventário e expansão do mundo (aprovada)
-5. Polimento visual, performance e experiência do jogador (5.1, 5.2 e 5.3 aprovadas; 5.4 revisão final em teste)
+5. Polimento visual, performance, experiência do jogador, revisão e deploy (concluída e aprovada)
 
-Consulte [o plano da Etapa 5](docs/ETAPA-5-PLANO.md) para os resultados da auditoria, limitações conhecidas e testes pendentes.
+Consulte [o plano da Etapa 5](docs/ETAPA-5-PLANO.md) para os resultados da auditoria, limitações conhecidas e melhorias futuras.
