@@ -78,7 +78,11 @@
         const { data, error } = await state.client.auth.signUp({
           email,
           password,
-          options: { data: { display_name: name } }
+          options: {
+            data: { display_name: name },
+            // Sempre retornar ao endereço público do jogo após confirmar o e-mail.
+            emailRedirectTo: "https://tibia-browser-mmorpg.vercel.app"
+          }
         });
         if (error) throw error;
         if (!data.session) {
