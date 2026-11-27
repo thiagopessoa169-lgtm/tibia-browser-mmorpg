@@ -286,7 +286,7 @@ class WorldScene extends Phaser.Scene {
     if(!this.player?.body)return;
     const active=document.activeElement;
     const typing=active && (active.matches("input,textarea,select") || active.isContentEditable);
-    if(typing){this.player.setVelocity(0,0);return;}
+    if(typing || this.playerRespawning){this.player.setVelocity(0,0);return;}
     this.updateMonsters(time);
     this.attackNearbyMonster(time);
     const left=this.cursors.left.isDown||this.keys.A.isDown,right=this.cursors.right.isDown||this.keys.D.isDown,up=this.cursors.up.isDown||this.keys.W.isDown,down=this.cursors.down.isDown||this.keys.S.isDown;
