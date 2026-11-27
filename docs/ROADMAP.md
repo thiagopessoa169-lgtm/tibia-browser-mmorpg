@@ -24,7 +24,7 @@
 ## Etapa 5 — Polimento, performance e deploy
 **Status: em andamento.**
 - [x] 5.1 Polimento visual — aprovada pelo usuário em 2026-11-27.
-- [ ] 5.2 Performance e estabilidade.
+- [ ] 5.2 Performance e estabilidade — em andamento.
 - [ ] 5.3 Experiência do jogador.
 - [ ] 5.4 Revisão e deploy.
 
