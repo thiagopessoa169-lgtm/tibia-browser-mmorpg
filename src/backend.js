@@ -9,6 +9,7 @@
     channel: null,
     connected: false,
     lastBroadcastAt: 0,
+    lastTrackAt: 0,
     lastPersistAt: 0,
     lastX: null,
     lastY: null,
@@ -169,6 +170,7 @@
     state.lastY = Number(character.y);
     state.lastPersistAt = 0;
     state.lastBroadcastAt = 0;
+    state.lastTrackAt = 0;
     if (window.AetheriaWorld?.setLocalPosition) {
       window.AetheriaWorld.setLocalPosition(character.x, character.y);
     }
@@ -210,9 +212,12 @@
             map_id: state.character.map_id
           });
           syncPresence(channel);
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
           state.connected = false;
+          console.error("[Aetheria] Falha no canal multiplayer:", status);
           if (statusLabel) statusLabel.textContent = "Reconectando...";
+        } else {
+          console.info("[Aetheria] Status do canal multiplayer:", status);
         }
       });
     state.channel = channel;
@@ -261,28 +266,27 @@
   }
 
   async function sendPosition(position) {
-    if (!state.character || !state.channel || !state.connected) return;
+    if (!state.character || !state.channel || !state.connected || !position) return;
     const now = Date.now();
-    const moved = state.lastX === null ||
-      Math.abs(position.x - state.lastX) + Math.abs(position.y - state.lastY) >= 2;
-    if (!moved || now - state.lastBroadcastAt < 100) return;
-
+    const x = Number(position.x), y = Number(position.y);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    const moved = state.lastX === null || Math.abs(x - state.lastX) + Math.abs(y - state.lastY) >= 1;
+    if (!moved || now - state.lastBroadcastAt < 80) return;
     state.lastBroadcastAt = now;
-    state.lastX = position.x;
-    state.lastY = position.y;
-    const payload = {
-      user_id: state.user.id,
-      character_id: state.character.id,
-      name: state.character.name,
-      x: Math.round(position.x),
-      y: Math.round(position.y),
-      map_id: "aetheria-village",
-      sent_at: now
-    };
-    state.channel.send({ type: "broadcast", event: "position", payload });
+    state.lastX = x;
+    state.lastY = y;
+    const payload = { user_id: state.user.id, character_id: state.character.id, name: state.character.name, x: Math.round(x), y: Math.round(y), map_id: "aetheria-village", sent_at: now };
+    try {
+      const result = await state.channel.send({ type: "broadcast", event: "position", payload });
+      if (result !== "ok" && result?.status !== "ok") console.warn("[Aetheria] Broadcast de posição não confirmado:", result);
+    } catch (error) { console.warn("[Aetheria] Erro ao transmitir posição:", error); }
+    if (now - state.lastTrackAt >= 400) {
+      state.lastTrackAt = now;
+      try { await state.channel.track(payload); }
+      catch (error) { console.warn("[Aetheria] Erro ao atualizar presença:", error); }
+    }
     if (now - state.lastPersistAt >= 1000) {
-      await persistPosition(payload);
-      state.channel?.track(payload);
+      persistPosition(payload).catch((error) => console.warn("[Aetheria] Erro ao salvar posição:", error));
     }
   }
 
