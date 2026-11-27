@@ -521,7 +521,7 @@
     slime_essence: { name: "Essência de lodo", type: "Material", description: "Material coletado dos Lodos da Floresta." },
     traveler_tunic: { name: "Túnica do viajante", type: "Equipamento · Corpo", description: "Uma túnica simples para a jornada.", action: "equip", actionLabel: "Equipar" },
     trail_boots: { name: "Botas de trilha", type: "Equipamento · Pés", description: "Botas resistentes para explorar Aetheria.", action: "equip", actionLabel: "Equipar" },
-    copper_charm: { name: "Amuleto de cobre", type: "Equipamento · Amuleto", description: "Um pequeno amuleto de proteção.", action: "equip", actionLabel: "Equipar" }
+    copper_charm: { name: "Amuleto de cobre", type: "Equipamento · Amuleto", description: "Um amuleto simples para completar seu equipamento.", action: "equip", actionLabel: "Equipar" }
   };
   const EQUIPMENT_SLOTS = [
     { key: "body", label: "Corpo" },
@@ -600,6 +600,8 @@
     });
     if (error || !data?.ok) {
       console.warn("[Aetheria] Não foi possível carregar a bolsa:", error?.message || data?.message);
+      const list = $("inventory-list");
+      if (list) list.textContent = "Não foi possível carregar seus itens. Feche e tente novamente.";
       return { ok: false, message: data?.message || error?.message };
     }
     state.inventoryData = data;
