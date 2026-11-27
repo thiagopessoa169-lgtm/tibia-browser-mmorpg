@@ -286,6 +286,7 @@
       catch (error) { console.warn("[Aetheria] Erro ao atualizar presença:", error); }
     }
     if (now - state.lastPersistAt >= 1000) {
+      state.lastPersistAt = now;
       persistPosition(payload).catch((error) => console.warn("[Aetheria] Erro ao salvar posição:", error));
     }
   }
