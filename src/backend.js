@@ -14,10 +14,6 @@
     lastX: null,
     lastY: null,
     mapId: "aetheria-village",
-    progressSaveTimer: null,
-    pendingProgress: null,
-    progressSaving: false,
-    progressSavePromise: null,
     mode: "login",
     questData: null,
     inventoryData: null
@@ -172,36 +168,50 @@
   }
 
   async function selectCharacter(character) {
-    if (state.progressSaveTimer) clearTimeout(state.progressSaveTimer);
-    state.pendingProgress = null;
     const level = Math.max(1, Math.floor(Number(character.level) || 1));
     const maxHp = Math.max(1, Math.floor(Number(character.max_hp) || 100));
-    const defeated = Number(character.hp) <= 0;
-    const hp = defeated ? maxHp : Math.min(maxHp, Math.max(0, Math.floor(Number(character.hp) || maxHp)));
+    const hp = Math.min(maxHp, Math.max(0, Math.floor(Number(character.hp) || 0)));
     const xp = Math.min(level * 100 - 1, Math.max(0, Math.floor(Number(character.xp) || 0)));
-    const x = defeated ? 1168 : Number(character.x);
-    const y = defeated ? 784 : Number(character.y);
-    state.character = { ...character, level, hp, max_hp: maxHp, xp, x, y };
+    state.character = { ...character, level, hp, max_hp: maxHp, xp };
+    state.mapId = character.map_id === "bosque-antigo" ? "bosque-antigo" : "aetheria-village";
+
+    if (hp <= 0) {
+      const restored = await respawnCharacter();
+      if (!restored?.ok) {
+        message($("character-message"), restored?.message || "Não foi possível restaurar o personagem.", "error");
+        return;
+      }
+      const moved = await changeMap("aetheria-village", 36 * 32 + 16, 24 * 32 + 16);
+      if (!moved?.ok) {
+        message($("character-message"), moved?.message || "Não foi possível retornar à vila.", "error");
+        return;
+      }
+    }
+
+    const current = state.character;
+    const currentLevel = Math.max(1, Number(current.level) || 1);
+    const currentMaxHp = Math.max(1, Number(current.max_hp) || 100);
+    const currentHp = Math.min(currentMaxHp, Math.max(0, Number(current.hp) || 0));
+    const currentXp = Math.min(currentLevel * 100 - 1, Math.max(0, Number(current.xp) || 0));
+    const x = Number(current.x) || 36 * 32 + 16;
+    const y = Number(current.y) || 24 * 32 + 16;
+
+    state.character = { ...current, level: currentLevel, hp: currentHp, max_hp: currentMaxHp, xp: currentXp, x, y };
     showCharacters();
     $("character-panel").hidden = true;
     $("account-bar").hidden = false;
-    $("account-label").textContent = character.name + " · " + state.user.email;
+    $("account-label").textContent = current.name + " · " + state.user.email;
     state.lastX = x;
     state.lastY = y;
     state.lastPersistAt = 0;
     state.lastBroadcastAt = 0;
-    state.mapId=character.map_id==="bosque-antigo"?"bosque-antigo":"aetheria-village";
-    window.AetheriaWorld?.loadMap?.(state.mapId,x,y,{level,hp,max_hp:maxHp,xp});
-    window.AetheriaWorld?.loadProgress?.({ level, hp, max_hp: maxHp, xp });
-    $("player-name").textContent = character.name;
-    $("player-level").textContent = "Nível " + level + " · Aventureiro";
+    state.mapId = current.map_id === "bosque-antigo" ? "bosque-antigo" : "aetheria-village";
+    window.AetheriaWorld?.loadMap?.(state.mapId, x, y, { level: currentLevel, hp: currentHp, max_hp: currentMaxHp, xp: currentXp });
+    window.AetheriaWorld?.loadProgress?.({ level: currentLevel, hp: currentHp, max_hp: currentMaxHp, xp: currentXp });
+    $("player-name").textContent = current.name;
+    $("player-level").textContent = "Nível " + currentLevel + " · Aventureiro";
     await connectWorld();
     await loadQuests();
-    // Se a sessão terminou durante a tela de derrota, retoma no ponto seguro.
-    if (defeated) {
-      await saveProgress({ level, hp, max_hp: maxHp, xp }, { immediate: true });
-      await persistPosition({ x, y });
-    }
   }
 
   async function connectWorld() {
@@ -302,63 +312,47 @@
     return true;
   }
 
-  async function flushProgress() {
-    if (state.progressSaveTimer) {
-      clearTimeout(state.progressSaveTimer);
-      state.progressSaveTimer = null;
+  async function invokeProgressAction(action, extra = {}) {
+    if (!state.client || !state.user || !state.character) {
+      return { ok: false, message: "Entre no jogo para salvar seu progresso." };
     }
-    if (state.progressSavePromise) return state.progressSavePromise;
-    if (!state.pendingProgress || !state.client || !state.user || !state.character) return false;
-
-    state.progressSaving = true;
-    state.progressSavePromise = (async () => {
-      let saved = true;
-      while (state.pendingProgress) {
-        const progress = state.pendingProgress;
-        state.pendingProgress = null;
-        const { data, error } = await state.client.from("characters").update({
-          level: progress.level,
-          hp: progress.hp,
-          max_hp: progress.max_hp,
-          xp: progress.xp,
-          updated_at: new Date().toISOString()
-        }).eq("id", state.character.id)
-          .eq("user_id", state.user.id)
-          .select("id")
-          .maybeSingle();
-        if (error || !data) {
-          console.warn("Falha ao salvar progressão:", error?.message || "Personagem não encontrado.");
-          saved = false;
-          break;
-        }
-        state.character = { ...state.character, ...progress };
-      }
-      return saved;
-    })();
-
-    try {
-      return await state.progressSavePromise;
-    } finally {
-      state.progressSaving = false;
-      state.progressSavePromise = null;
-      if (state.pendingProgress && !state.progressSaveTimer) {
-        state.progressSaveTimer = setTimeout(() => flushProgress(), 900);
-      }
+    const { data, error } = await state.client.functions.invoke("progress-action", {
+      body: { action, character_id: state.character.id, ...extra }
+    });
+    if (error) {
+      console.warn("[Aetheria] Falha na progressão do servidor:", error.message);
+      return { ok: false, message: error.message || "Não foi possível atualizar o progresso." };
     }
+    if (data?.character) state.character = { ...state.character, ...data.character };
+    return data || { ok: false, message: "O servidor não confirmou a ação." };
   }
 
-  function saveProgress(progress, options = {}) {
-    if (!state.client || !state.user || !state.character || !progress) return false;
-    const level = Math.max(1, Math.floor(Number(progress.level) || 1));
-    const maxHp = Math.max(1, Math.floor(Number(progress.max_hp) || 100));
-    const hp = Math.min(maxHp, Math.max(0, Math.floor(Number(progress.hp) || 0)));
-    const xp = Math.min(level * 100 - 1, Math.max(0, Math.floor(Number(progress.xp) || 0)));
-    state.pendingProgress = { level, hp, max_hp: maxHp, xp };
-    if (state.progressSaveTimer) clearTimeout(state.progressSaveTimer);
-    state.progressSaveTimer = null;
-    if (options.immediate) return flushProgress();
-    state.progressSaveTimer = setTimeout(() => flushProgress(), 700);
-    return true;
+  async function awardMonsterDefeat(spawnIndex, defeatPosition) {
+    const position = currentPosition();
+    if (!position || !(await persistPosition(position))) {
+      return { ok: false, message: "Não foi possível atualizar sua posição. Tente novamente." };
+    }
+    const result = await invokeProgressAction("award_monster", {
+      spawn_index: spawnIndex,
+      defeat_x: Number(defeatPosition?.x),
+      defeat_y: Number(defeatPosition?.y)
+    });
+    if (result?.ok && result.character) window.AetheriaWorld?.loadProgress?.(result.character);
+    return result;
+  }
+
+  async function applyMonsterDamage(spawnIndex) {
+    const position = currentPosition();
+    if (!position || !(await persistPosition(position))) return { ok: false, message: "Não foi possível validar sua posição." };
+    const result = await invokeProgressAction("monster_damage", { spawn_index: spawnIndex });
+    if (result?.ok && result.character) window.AetheriaWorld?.applyServerHp?.(result.character.hp);
+    return result;
+  }
+
+  async function respawnCharacter() {
+    const result = await invokeProgressAction("respawn");
+    if (result?.ok && result.character) window.AetheriaWorld?.loadProgress?.(result.character);
+    return result;
   }
 
   function currentPosition() {
@@ -658,7 +652,6 @@
   }
 
   async function logout() {
-    await flushProgress();
     await saveCurrentPosition();
     if (state.channel) await state.client.removeChannel(state.channel);
     if (state.progressChannel) await state.client.removeChannel(state.progressChannel);
@@ -704,12 +697,10 @@
     });
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
-        flushProgress();
         saveCurrentPosition();
       }
     });
     window.addEventListener("pagehide", () => {
-      flushProgress();
       saveCurrentPosition();
     });
     setMode("login");
@@ -735,8 +726,10 @@
     sendPosition,
     changeMap,
     saveCurrentPosition,
-    saveProgress,
-    flushProgress,
+    awardMonsterDefeat,
+    applyMonsterDamage,
+    respawnCharacter,
+    hasOnlineCharacter: () => Boolean(state.client && state.user && state.character),
     attackPlayer,
     loadQuests,
     acceptQuest,
