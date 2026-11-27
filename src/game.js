@@ -61,7 +61,20 @@ class WorldScene extends Phaser.Scene {
       },
       getLocalPosition: () => ({ x: this.player.x, y: this.player.y }),
       updateRemotePlayer: (data) => this.updateRemotePlayer(data),
-      syncRemotePlayers: (players) => this.syncRemotePlayers(players)
+      syncRemotePlayers: (players) => this.syncRemotePlayers(players),
+      loadProgress: (progress) => {
+        this.playerLevel = Math.max(1, Math.floor(Number(progress?.level) || 1));
+        this.playerMaxHp = Math.max(1, Math.floor(Number(progress?.max_hp) || 100));
+        this.playerHp = Phaser.Math.Clamp(
+          Math.floor(Number(progress?.hp) || 0), 0, this.playerMaxHp
+        );
+        this.playerXp = Phaser.Math.Clamp(
+          Math.floor(Number(progress?.xp) || 0), 0, this.playerLevel * 100 - 1
+        );
+        const levelLabel = document.getElementById("player-level");
+        if (levelLabel) levelLabel.textContent = "Nível " + this.playerLevel + " · Aventureiro";
+        this.updatePlayerHud();
+      }
     };
     this.physics.world.setFPS(60);
   }
@@ -166,11 +179,19 @@ class WorldScene extends Phaser.Scene {
     const levelLabel=document.getElementById("player-level");
     if(levelLabel)levelLabel.textContent="Nível "+this.playerLevel+" · Aventureiro";
     this.updatePlayerHud();
+    window.AetheriaBackend?.saveProgress?.({
+      level: this.playerLevel, hp: this.playerHp,
+      max_hp: this.playerMaxHp, xp: this.playerXp
+    }, { immediate: true });
   }
   damagePlayer(amount){
     if(this.playerRespawning) return;
     this.playerHp=Math.max(0,this.playerHp-amount);
     this.updatePlayerHud();
+    window.AetheriaBackend?.saveProgress?.({
+      level: this.playerLevel, hp: this.playerHp,
+      max_hp: this.playerMaxHp, xp: this.playerXp
+    }, { immediate: this.playerHp <= 0 });
     this.cameras.main.shake(100,.002);
     if(this.playerHp<=0){
       this.playerRespawning=true;this.player.setVelocity(0,0);this.player.setTint(0x89918b);
@@ -179,6 +200,11 @@ class WorldScene extends Phaser.Scene {
         this.player.setPosition(36*TILE+16,24*TILE+16).clearTint();
         this.playerHp=this.playerMaxHp;this.playerRespawning=false;
         this.updatePlayerHud();
+        window.AetheriaBackend?.saveProgress?.({
+          level: this.playerLevel, hp: this.playerHp,
+          max_hp: this.playerMaxHp, xp: this.playerXp
+        }, { immediate: true });
+        window.AetheriaBackend?.saveCurrentPosition?.();
       });
     }
   }
