@@ -410,15 +410,35 @@ class WorldScene extends Phaser.Scene {
     this.time.delayedCall(110,()=>{if(target.active)target.clearTint();});
     this.drawMonsterBar(target);
     if(target.hp<=0){
-      const x=target.homeX,y=target.homeY,index=target.spawnIndex;
+      const index=target.spawnIndex;
+      const regionId=target.regionId;
       const defeatPosition={x:target.x,y:target.y};
+      const tracked=target.questTracked;
       target.nameLabel.destroy();target.hpBar.destroy();target.destroy();
-      this.gainExperience(target.xpReward||25);this.showCombatMessage("+"+(target.xpReward||25)+" XP");
-      if(target.questTracked)Promise.resolve(window.AetheriaBackend?.flushProgress?.()).then(()=>window.AetheriaBackend?.recordSlimeDefeat?.(index,defeatPosition)).then(result=>{if(result?.ok&&result.completed_now)this.showCombatMessage("Missão concluída! Recompensa registrada.");else if(result?.ok&&result.tracked!==false)this.showCombatMessage("Progresso da missão atualizado: "+result.progress+" / "+result.target+".");}).catch(()=>console.warn("[Aetheria] Não foi possível atualizar a missão de caça."));
-      this.time.delayedCall(7000,()=>{if(this.scene.isActive()&&this.mapId===target.regionId)this.spawnMonster(this.monsterSpawns[index],index);});
+      const backend=window.AetheriaBackend;
+      if(backend?.hasOnlineCharacter?.()){
+        Promise.resolve(backend.awardMonsterDefeat?.(index,defeatPosition)).then(result=>{
+          if(result?.ok){
+            this.showCombatMessage("+"+(result.reward_xp||0)+" XP confirmado pelo servidor.");
+            if(tracked){
+              return backend.recordSlimeDefeat?.(index,defeatPosition);
+            }
+          }else{
+            this.showCombatMessage(result?.message||"Não foi possível confirmar a recompensa.");
+          }
+          return null;
+        }).then(result=>{
+          if(result?.ok&&result.completed_now)this.showCombatMessage("Missão concluída! Recompensa registrada.");
+          else if(result?.ok&&result.tracked!==false)this.showCombatMessage("Progresso da missão atualizado: "+result.progress+" / "+result.target+".");
+        }).catch(()=>this.showCombatMessage("Não foi possível conectar ao servidor de progressão."));
+      }else{
+        this.gainLocalExperience(target.xpReward||25);
+        this.showCombatMessage("+"+(target.xpReward||25)+" XP");
+      }
+      this.time.delayedCall(7000,()=>{if(this.scene.isActive()&&this.mapId===regionId)this.spawnMonster(this.monsterSpawns[index],index);});
     }
   }
-  gainExperience(amount){
+  gainLocalExperience(amount){
     this.playerXp+=amount;
     let required=this.playerLevel*100;
     while(this.playerXp>=required){
@@ -429,10 +449,6 @@ class WorldScene extends Phaser.Scene {
     const levelLabel=document.getElementById("player-level");
     if(levelLabel)levelLabel.textContent="Nível "+this.playerLevel+" · Aventureiro";
     this.updatePlayerHud();
-    window.AetheriaBackend?.saveProgress?.({
-      level: this.playerLevel, hp: this.playerHp,
-      max_hp: this.playerMaxHp, xp: this.playerXp
-    }, { immediate: true });
   }
   applyServerHp(serverHp){
     if(this.playerRespawning) return;
@@ -447,31 +463,50 @@ class WorldScene extends Phaser.Scene {
     if(this.playerRespawning) return;
     this.playerHp=Math.max(0,this.playerHp-amount);
     this.updatePlayerHud();
-    window.AetheriaBackend?.saveProgress?.({
-      level: this.playerLevel, hp: this.playerHp,
-      max_hp: this.playerMaxHp, xp: this.playerXp
-    }, { immediate: this.playerHp <= 0 });
     this.cameras.main.shake(100,.002);
     if(this.playerHp<=0){
       this.playerRespawning=true;this.player.setVelocity(0,0);this.player.setTint(0x89918b);
       this.showCombatMessage("Você foi derrotado! Retornando à vila...");
-      this.time.delayedCall(2200,()=>{
-        this.player.setPosition(36*TILE+16,24*TILE+16).clearTint();
-        this.playerHp=this.playerMaxHp;
-        if(this.mapId!=="aetheria-village"){
-          Promise.resolve(window.AetheriaBackend?.changeMap?.("aetheria-village",36*TILE+16,24*TILE+16)).then(result=>{
-            if(result?.ok)this.scene.restart({mapId:"aetheria-village",x:36*TILE+16,y:24*TILE+16,progress:{level:this.playerLevel,hp:this.playerHp,max_hp:this.playerMaxHp,xp:this.playerXp}});
-            else{this.playerRespawning=false;this.player.setPosition(6*TILE+16,24*TILE+16);this.showCombatMessage("Não foi possível retornar à vila. Tente o portal novamente.");}
-          });
+      this.time.delayedCall(2200,async()=>{
+        const safeX=36*TILE+16,safeY=24*TILE+16;
+        const backend=window.AetheriaBackend;
+        if(backend?.hasOnlineCharacter?.()){
+          const restored=await backend.respawnCharacter?.();
+          if(!restored?.ok||!restored.character){
+            this.playerRespawning=false;
+            this.showCombatMessage(restored?.message||"Não foi possível restaurar o personagem. Tente novamente.");
+            return;
+          }
+          const progress=restored.character;
+          if(this.mapId!=="aetheria-village"){
+            const moved=await backend.changeMap?.("aetheria-village",safeX,safeY);
+            if(moved?.ok){
+              this.scene.restart({mapId:"aetheria-village",x:safeX,y:safeY,progress});
+              return;
+            }
+            this.playerRespawning=false;
+            this.showCombatMessage(moved?.message||"Não foi possível retornar à vila. Tente o portal novamente.");
+            return;
+          }
+          this.player.setPosition(safeX,safeY).clearTint();
+          this.playerLevel=Number(progress.level)||this.playerLevel;
+          this.playerMaxHp=Number(progress.max_hp)||this.playerMaxHp;
+          this.playerHp=Number(progress.hp)||this.playerMaxHp;
+          this.playerXp=Number(progress.xp)||0;
+          this.playerRespawning=false;
+          this.updatePlayerHud();
+          await backend.saveCurrentPosition?.();
           return;
         }
+        const progress={level:this.playerLevel,hp:this.playerMaxHp,max_hp:this.playerMaxHp,xp:this.playerXp};
+        if(this.mapId!=="aetheria-village"){
+          this.scene.restart({mapId:"aetheria-village",x:safeX,y:safeY,progress});
+          return;
+        }
+        this.player.setPosition(safeX,safeY).clearTint();
+        this.playerHp=this.playerMaxHp;
         this.playerRespawning=false;
         this.updatePlayerHud();
-        window.AetheriaBackend?.saveProgress?.({
-          level: this.playerLevel, hp: this.playerHp,
-          max_hp: this.playerMaxHp, xp: this.playerXp
-        }, { immediate: true });
-        window.AetheriaBackend?.saveCurrentPosition?.();
       });
     }
   }
@@ -523,7 +558,12 @@ class WorldScene extends Phaser.Scene {
           monster.setVelocity(0,0);
           if(time>=monster.nextAttackAt){
             monster.nextAttackAt=time+1050;
-            this.damagePlayer(monster.attackDamage||7);
+            const backend=window.AetheriaBackend;
+            if(backend?.hasOnlineCharacter?.()){
+              backend.applyMonsterDamage?.(monster.spawnIndex).catch(()=>console.warn("[Aetheria] Não foi possível confirmar o dano do monstro."));
+            }else{
+              this.damagePlayer(monster.attackDamage||7);
+            }
           }
         }
       }else{
