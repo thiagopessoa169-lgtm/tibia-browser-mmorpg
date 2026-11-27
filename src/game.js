@@ -171,7 +171,9 @@ class WorldScene extends Phaser.Scene {
     (this.herbNodes||[]).forEach((node)=>{
       if(collected.has(node.key)){
         node.collected=true;
-        node.sprite.destroy();node.label.destroy();node.hint.destroy();
+        node.sprite.setVisible(false);
+        node.label.setVisible(false);
+        node.hint.setVisible(false);
       }
     });
     this.refreshNpcQuestButton();
@@ -200,7 +202,9 @@ class WorldScene extends Phaser.Scene {
         return;
       }
       node.collected=true;
-      node.sprite.destroy();node.label.destroy();node.hint.destroy();
+      node.sprite.setVisible(false);
+      node.label.setVisible(false);
+      node.hint.setVisible(false);
       this.showCombatMessage(result.completed_now
         ? "Missão concluída! Recompensa registrada."
         : "Erva coletada! Progresso salvo.");
