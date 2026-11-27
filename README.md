@@ -29,7 +29,7 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 
 1. Base jogável no navegador (aprovada)
 2. Supabase Auth, personagens, PostgreSQL e Realtime (em implementação)
-3. Combate, monstros, XP e PVP (em desenvolvimento)
+3. Combate, monstros, XP e PVP (Etapa 3.1 em implementação)
 4. NPCs, quests, inventário e mapas
 5. Polimento, performance e deploy
 
