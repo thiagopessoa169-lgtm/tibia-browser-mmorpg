@@ -1,7 +1,7 @@
 # Etapa 5 — Polimento visual, performance e deploy
 
 ## Status geral
-**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 5.1 foi implementada, publicada e aprovada pelo usuário em 2026-11-27. As subetapas seguintes dependem da validação da anterior.
+**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 5.1 foi implementada, publicada e aprovada pelo usuário em 2026-11-27. A subetapa 5.1 foi aprovada; a 5.2 está em andamento e depende de teste do usuário antes da aprovação.
 
 ## Objetivo
 Refinar a apresentação e a experiência de Aetheria Online sem alterar regras de combate, progressão, inventário, missões, autenticação ou persistência já aprovadas.
@@ -25,7 +25,18 @@ Implementado e publicado:
 
 ## Próximas subetapas — não iniciadas
 ### 5.2 — Performance e estabilidade
-Otimização e testes de FPS, renderização, sincronização e transições.
+**Status: em andamento em 2026-11-27.**
+
+Escopo desta subetapa:
+- Reduzir trabalho repetitivo por frame na IA dos monstros e na atualização das barras de vida.
+- Revisar o envio de posição e a interpolação de jogadores remotos sem alterar a frequência/garantias de persistência já existentes.
+- Verificar inicialização, transições de região, retorno de foco e limpeza de objetos/canais.
+- Testar em navegador desktop e tela menor, observando travamentos, erros no console e comportamento multiplayer.
+- Preservar combate, movimento, missões, inventário, progresso e regras de PvP.
+
+**Primeira otimização aplicada:** atualização da lógica de IA dos monstros em intervalos de 100 ms e redesenho das barras/nomes em intervalos de 250 ms, mantendo o movimento físico contínuo entre as atualizações.
+
+**Critérios de aceitação:** jogo inicia e troca de região sem erros; monstros continuam patrulhando, perseguindo e atacando; barras de vida continuam corretas após receber dano; movimento e combate do jogador permanecem responsivos; multiplayer e salvamento continuam funcionando.
 
 ### 5.3 — Experiência do jogador
 Feedback de ações, indicadores, controles, menus e mensagens.
