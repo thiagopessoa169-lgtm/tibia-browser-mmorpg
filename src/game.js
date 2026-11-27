@@ -96,11 +96,18 @@ class WorldScene extends Phaser.Scene {
         fontFamily:"Arial",fontSize:"10px",color:"#d8efff",
         stroke:"#142b3b",strokeThickness:3
       }).setOrigin(.5).setDepth(y+50);
-      remote = {sprite,label};
+      remote = {sprite,label,targetX:x,targetY:y,lastUpdateAt:Number(data.sent_at)||0};
       this.remotePlayers.set(data.user_id,remote);
+    } else {
+      const incomingAt = Number(data.sent_at) || 0;
+      // Presença pode chegar atrasada; não deixe dados antigos sobrescreverem o broadcast recente.
+      if (incomingAt && remote.lastUpdateAt && incomingAt < remote.lastUpdateAt) return;
+      remote.targetX = x;
+      remote.targetY = y;
+      if (incomingAt) remote.lastUpdateAt = incomingAt;
+      remote.label.setText(String(data.name || "Aventureiro"));
     }
-    remote.sprite.setPosition(x,y).setDepth(y+30);
-    remote.label.setPosition(x,y-28).setText(String(data.name || "Aventureiro")).setDepth(y+50);
+    remote.label.setDepth(y+50);
   }
   syncRemotePlayers(players){
     const active = new Set();
@@ -117,7 +124,17 @@ class WorldScene extends Phaser.Scene {
       }
     }
   }
-  update(){
+  update(time, delta){
+    // Suaviza a posição dos jogadores remotos sem alterar a movimentação local.
+    const blend = 1 - Math.exp(-Math.min(delta || 16.67, 50) / 75);
+    for (const remote of this.remotePlayers.values()) {
+      const currentX = remote.sprite.x;
+      const currentY = remote.sprite.y;
+      const nextX = Phaser.Math.Linear(currentX, remote.targetX, blend);
+      const nextY = Phaser.Math.Linear(currentY, remote.targetY, blend);
+      remote.sprite.setPosition(nextX, nextY).setDepth(nextY + 30);
+      remote.label.setPosition(nextX, nextY - 28).setDepth(nextY + 50);
+    }
     if(!this.player?.body)return;
     const active=document.activeElement;
     const typing=active && (active.matches("input,textarea,select") || active.isContentEditable);
