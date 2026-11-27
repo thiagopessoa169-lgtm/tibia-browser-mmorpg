@@ -18,7 +18,8 @@
     progressSaving: false,
     progressSavePromise: null,
     mode: "login",
-    questData: null
+    questData: null,
+    inventoryData: null
   };
 
   const $ = (id) => document.getElementById(id);
@@ -194,6 +195,7 @@
     $("player-level").textContent = "Nível " + level + " · Aventureiro";
     await connectWorld();
     await loadQuests();
+    await loadInventory();
     // Se a sessão terminou durante a tela de derrota, retoma no ponto seguro.
     if (defeated) {
       await saveProgress({ level, hp, max_hp: maxHp, xp }, { immediate: true });
@@ -479,6 +481,7 @@
     state.questData = result;
     renderQuestPanel(result);
     window.AetheriaWorld?.loadQuestData?.(result);
+    await loadInventory();
     return result;
   }
 
@@ -512,6 +515,136 @@
     return result;
   }
 
+
+  const INVENTORY_ITEMS = {
+    medicinal_herb: { name: "Erva medicinal", type: "Consumível", description: "Recupera até 25 pontos de vida.", action: "use", actionLabel: "Usar" },
+    slime_essence: { name: "Essência de lodo", type: "Material", description: "Material coletado dos Lodos da Floresta." },
+    traveler_tunic: { name: "Túnica do viajante", type: "Equipamento · Corpo", description: "Uma túnica simples para a jornada.", action: "equip", actionLabel: "Equipar" },
+    trail_boots: { name: "Botas de trilha", type: "Equipamento · Pés", description: "Botas resistentes para explorar Aetheria.", action: "equip", actionLabel: "Equipar" },
+    copper_charm: { name: "Amuleto de cobre", type: "Equipamento · Amuleto", description: "Um pequeno amuleto de proteção.", action: "equip", actionLabel: "Equipar" }
+  };
+  const EQUIPMENT_SLOTS = [
+    { key: "body", label: "Corpo" },
+    { key: "feet", label: "Pés" },
+    { key: "amulet", label: "Amuleto" }
+  ];
+
+  function renderInventoryPanel(data) {
+    const list = $("inventory-list");
+    const equipmentList = $("equipment-list");
+    const capacity = $("inventory-capacity");
+    if (!list || !equipmentList) return;
+    list.replaceChildren();
+    equipmentList.replaceChildren();
+    const items = Array.isArray(data?.inventory) ? data.inventory : [];
+    const total = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    if (capacity) capacity.textContent = total + " / 20 itens";
+    if (!items.length) {
+      const empty = document.createElement("p");
+      empty.className = "inventory-empty";
+      empty.textContent = "Sua bolsa está vazia.";
+      list.append(empty);
+    }
+    items.forEach((entry) => {
+      const definition = INVENTORY_ITEMS[entry.item_key];
+      if (!definition) return;
+      const card = document.createElement("article");
+      card.className = "inventory-item";
+      const details = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = definition.name + " ×" + entry.quantity;
+      const type = document.createElement("small");
+      type.textContent = definition.type;
+      const description = document.createElement("p");
+      description.textContent = definition.description;
+      details.append(name, type, description);
+      card.append(details);
+      if (definition.action) {
+        const action = document.createElement("button");
+        action.type = "button";
+        action.className = "inventory-action";
+        action.dataset.inventoryAction = definition.action;
+        action.dataset.itemKey = entry.item_key;
+        action.textContent = definition.actionLabel;
+        card.append(action);
+      }
+      list.append(card);
+    });
+    const equipped = new Map((Array.isArray(data?.equipment) ? data.equipment : []).map((item) => [item.slot, item.item_key]));
+    EQUIPMENT_SLOTS.forEach((slot) => {
+      const row = document.createElement("div");
+      row.className = "equipment-slot";
+      const label = document.createElement("strong");
+      label.textContent = slot.label;
+      const item = equipped.get(slot.key);
+      const value = document.createElement("span");
+      value.textContent = item ? (INVENTORY_ITEMS[item]?.name || item) : "Vazio";
+      row.append(label, value);
+      if (item) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "inventory-action secondary";
+        remove.dataset.inventoryAction = "unequip";
+        remove.dataset.slot = slot.key;
+        remove.textContent = "Remover";
+        row.append(remove);
+      }
+      equipmentList.append(row);
+    });
+  }
+
+  async function loadInventory() {
+    if (!state.client || !state.character || !state.user) return { ok: false };
+    const { data, error } = await state.client.functions.invoke("inventory-action", {
+      body: { action: "list", character_id: state.character.id }
+    });
+    if (error || !data?.ok) {
+      console.warn("[Aetheria] Não foi possível carregar a bolsa:", error?.message || data?.message);
+      return { ok: false, message: data?.message || error?.message };
+    }
+    state.inventoryData = data;
+    renderInventoryPanel(data);
+    return data;
+  }
+
+  async function performInventoryAction(action, itemKey, slot) {
+    if (!state.client || !state.character || !state.user) return;
+    const panel = $("inventory-panel");
+    if (panel) panel.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+    const { data, error } = await state.client.functions.invoke("inventory-action", {
+      body: { action, character_id: state.character.id, item_key: itemKey || undefined, slot: slot || undefined }
+    });
+    if (error || !data?.ok) {
+      window.AetheriaWorld?.showMessage?.(data?.message || error?.message || "Não foi possível atualizar a bolsa.");
+      await loadInventory();
+      return;
+    }
+    state.inventoryData = data;
+    if (data.character) {
+      state.character = { ...state.character, ...data.character };
+      window.AetheriaWorld?.loadProgress?.(data.character);
+    }
+    renderInventoryPanel(data);
+    const result = data.action_result || {};
+    if (action === "use") {
+      window.AetheriaWorld?.showMessage?.("Você usou uma erva medicinal e recuperou " + (result.healed || 25) + " HP.");
+    } else if (action === "equip") {
+      window.AetheriaWorld?.showMessage?.("Equipamento atualizado.");
+    } else if (action === "unequip") {
+      window.AetheriaWorld?.showMessage?.("Equipamento guardado na bolsa.");
+    }
+  }
+
+  function openInventory() {
+    if (!state.character) return;
+    window.AetheriaWorld?.setInventoryOpen?.(true);
+    loadInventory();
+  }
+
+  function closeInventory() {
+    window.AetheriaWorld?.setInventoryOpen?.(false);
+  }
+
   function getQuestState(questKey) {
     return state.questData?.quests?.find((quest) => quest.quest_key === questKey) || null;
   }
@@ -527,7 +660,9 @@
     state.user = null;
     state.character = null;
     state.questData = null;
+    state.inventoryData = null;
     renderQuestPanel(null);
+    closeInventory();
     state.connected = false;
     if (statusLabel) statusLabel.textContent = "Mundo local";
     showAuth();
@@ -548,6 +683,17 @@
     $("auth-mode-toggle").addEventListener("click", () => setMode(state.mode === "login" ? "register" : "login"));
     $("character-form").addEventListener("submit", createCharacter);
     $("logout-btn").addEventListener("click", logout);
+    $("inventory-open")?.addEventListener("click", openInventory);
+    $("inventory-close")?.addEventListener("click", closeInventory);
+    $("inventory-panel")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-inventory-action]");
+      if (!button || button.disabled) return;
+      performInventoryAction(
+        button.dataset.inventoryAction,
+        button.dataset.itemKey,
+        button.dataset.slot
+      );
+    });
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
         flushProgress();
@@ -588,6 +734,8 @@
     collectHerb,
     recordSlimeDefeat,
     getQuestState,
+    openInventory,
+    closeInventory,
     isOnline: () => state.connected
   };
   document.addEventListener("DOMContentLoaded", init);
