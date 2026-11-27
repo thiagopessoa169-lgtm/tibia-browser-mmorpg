@@ -13,6 +13,7 @@
 **Status: aprovada.**
 - [x] PvE, monstros, XP, níveis, morte/respawn e persistência.
 - [x] PvP validado pelo servidor e restrito à arena.
+- [ ] Revisão técnica posterior: a gravação de XP/HP/nível ainda aceita atualização direta pelo cliente; consultar `docs/ETAPA-5-PLANO.md`.
 
 ## Etapa 4 — Conteúdo
 **Status: aprovada por completo.**
@@ -25,7 +26,7 @@
 **Status: em andamento.**
 - [x] 5.1 Polimento visual — aprovada pelo usuário em 2026-11-27.
 - [x] 5.2 Performance e estabilidade — aprovada pelo usuário em 2026-11-27.
-- [ ] 5.3 Experiência do jogador — em andamento.
-- [ ] 5.4 Revisão e deploy.
+- [x] 5.3 Experiência do jogador — aprovada pelo usuário em 2026-11-27.
+- [ ] 5.4 Revisão e deploy — auditoria técnica em andamento; pontos de atenção documentados.
 
 Cada subetapa será implementada, testada e submetida à aprovação do usuário antes de avançar.
