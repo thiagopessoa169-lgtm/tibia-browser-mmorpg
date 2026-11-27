@@ -372,7 +372,10 @@
       const result = await state.channel.send({ type: "broadcast", event: "position", payload });
       if (result !== "ok" && result?.status !== "ok") console.warn("[Aetheria] Broadcast de posição não confirmado:", result);
     } catch (error) { console.warn("[Aetheria] Erro ao transmitir posição:", error); }
-    if (now - state.lastPersistAt >= 1000) {
+    const inArena = x >= 31 * 32 + 16 && x <= 42 * 32 + 16
+      && y >= 35 * 32 + 16 && y <= 43 * 32 + 16;
+    const persistInterval = inArena ? 300 : 1000;
+    if (now - state.lastPersistAt >= persistInterval) {
       state.lastPersistAt = now;
       persistPosition(payload).catch((error) => console.warn("[Aetheria] Erro ao salvar posição:", error));
     }
