@@ -79,3 +79,45 @@
 .inventory-empty{font-size:10px;color:#b4c4b5;line-height:1.5}
 .inventory-help{margin:12px 0 0;color:#9eb09e;font-size:9px}
 @media(max-width:600px){.inventory-panel{padding:12px;max-height:84%}.inventory-heading h2{font-size:16px}.inventory-columns{grid-template-columns:1fr;gap:14px}.inventory-item{padding:8px}.inventory-item strong{font-size:10px}.inventory-action{font-size:9px;padding:6px 8px}}
+
+
+/* Etapa 5.1 — refinamento visual da interface */
+:root{color-scheme:dark;--aether-ink:#101b17;--aether-panel:#192b24;--aether-line:#71866d;--aether-gold:#d8c58f;--aether-leaf:#a9c38a;--aether-muted:#aebfae}
+body{background:radial-gradient(ellipse at 50% -12%,#3a5a48 0%,#1b3028 42%,#0c1512 100%);background-attachment:fixed}
+.topbar{min-height:66px;border-bottom:1px solid #91a78325;margin-bottom:14px}
+.brand-mark{box-shadow:inset 0 1px #ffffff25,0 5px 18px #0004;background:linear-gradient(145deg,#405844,#263a30)}
+.brand strong{font-family:Georgia,serif;font-size:15px;color:#f0e7c9;text-shadow:0 2px 12px #0008}
+.world-status{display:flex;align-items:center;gap:5px;padding:7px 11px;border:1px solid #82947b44;border-radius:999px;background:#14211dbb}
+.status-dot{flex:none}
+.account-panel,.account-bar{background:linear-gradient(145deg,#20372ceF,#14221def);border-color:#82987888;box-shadow:0 12px 32px #0004,inset 0 1px #ffffff0b}
+.panel-title{font-size:19px;text-shadow:0 2px 14px #0008}
+.account-panel button,.account-bar button,.npc-quest-accept,.inventory-action,.npc-dialogue-close,.inventory-heading>button{transition:transform .16s ease,filter .16s ease,background-color .16s ease,border-color .16s ease}
+.account-panel button:hover,.account-bar button:hover,.npc-quest-accept:hover,.inventory-action:not(:disabled):hover,.npc-dialogue-close:hover,.inventory-heading>button:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.account-panel button:active,.account-bar button:active,.npc-quest-accept:active,.inventory-action:not(:disabled):active{transform:translateY(0)}
+button:focus-visible,input:focus-visible{outline:2px solid #d8c58f;outline-offset:3px}
+.game-shell{border-color:#8b9b75;box-shadow:0 26px 90px #0009,0 0 0 1px #d8c58f18,0 0 36px #9eb77b12}
+#game{background:radial-gradient(ellipse at 50% 45%,#496d50,#263f33 78%)}
+.player-card,.location-card,.quest-panel{background:linear-gradient(145deg,#182a22ee,#101d18ee);border-color:#9aab7b77;box-shadow:0 8px 24px #0006,inset 0 1px #ffffff0a}
+.player-card{min-width:218px}
+.avatar{box-shadow:inset 0 1px #fff8,0 3px 9px #0005}
+.health-track,.xp-track{height:6px;border:1px solid #ffffff16;background:#0c1712}
+.health-track i,.xp-track i{border-radius:8px;transition:width .25s ease}
+.location-card strong{font-family:Georgia,serif;color:#f0e7c9}
+.hint{border-color:#a5b88a66;background:linear-gradient(90deg,#102019ee,#1b3028ee,#102019ee);box-shadow:0 5px 20px #0006}
+.npc-dialogue,.inventory-panel{background:linear-gradient(145deg,#223b2ef8,#101d18f8);border-color:#c0c995;box-shadow:0 20px 65px #000c,inset 0 1px #ffffff12}
+.quest-panel h2,.inventory-columns h3{letter-spacing:.35px}
+.inventory-item,.equipment-slot{border-color:#81947788;background:linear-gradient(145deg,#1b3027ee,#122019ee)}
+footer{padding:19px 10px;color:#9bad9e;letter-spacing:.1px}
+@media(max-width:600px){
+  .topbar{height:auto;min-height:54px;align-items:flex-start;gap:8px}
+  .world-status{font-size:9px;padding:6px 8px}
+  .brand-mark{width:32px;height:32px}
+  .brand strong{font-size:13px}
+  .player-card{min-width:0}
+  .player-info strong{font-size:11px}
+  .location-card strong{font-size:10px}
+  .hint{max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
