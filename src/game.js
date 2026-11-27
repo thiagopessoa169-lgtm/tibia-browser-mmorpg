@@ -158,7 +158,7 @@ class WorldScene extends Phaser.Scene {
       const label=this.add.text(x,y-20,"Erva silvestre",{
         fontFamily:"Arial",fontSize:"9px",color:"#e0f0b5",
         stroke:"#263523",strokeThickness:3
-      }).setOrigin(.5).setDepth(y+50);
+      }).setOrigin(.5).setDepth(y+50).setVisible(false);
       const hint=this.add.text(x,y-34,"E · coletar",{
         fontFamily:"Arial",fontSize:"9px",color:"#fff0b0",
         stroke:"#263523",strokeThickness:3
@@ -186,7 +186,9 @@ class WorldScene extends Phaser.Scene {
       if(distance<distanceLimit){distanceLimit=distance;nearest=node;}
     });
     (this.herbNodes||[]).forEach((node)=>{
-      if(node.hint?.active)node.hint.setVisible(node===nearest&&!this.dialogueOpen);
+      const visible=node===nearest&&!this.dialogueOpen;
+      if(node.label?.active)node.label.setVisible(visible);
+      if(node.hint?.active)node.hint.setVisible(visible);
     });
     return nearest;
   }
