@@ -38,7 +38,7 @@
   <div id="account-bar" class="account-bar" hidden>
     <strong id="account-label">Conta conectada</strong>
     <span>Jogadores online: <b id="online-count">1</b></span>
-    <button id="logout-btn" type="button" class="secondary">Sair</button>
+    <button id="inventory-open" type="button" class="secondary">Bolsa (I)</button><button id="logout-btn" type="button" class="secondary">Sair</button>
   </div>
 </section>
 <section class="game-shell" aria-label="Jogo Aetheria Online">
@@ -51,6 +51,17 @@
     <p id="npc-dialogue-text"></p>
     <button id="npc-quest-accept" type="button" class="npc-quest-accept" hidden>Aceitar missão</button>
     <small>Pressione E ou Esc para fechar</small>
+  </section>
+  <section id="inventory-panel" class="inventory-panel" role="dialog" aria-modal="true" aria-labelledby="inventory-title" hidden>
+    <div class="inventory-heading">
+      <div><span class="inventory-kicker">AVENTUREIRO</span><h2 id="inventory-title">Bolsa e equipamentos</h2><small id="inventory-capacity">0 / 20 itens</small></div>
+      <button id="inventory-close" type="button" aria-label="Fechar inventário">×</button>
+    </div>
+    <div class="inventory-columns">
+      <section class="inventory-bag"><h3>Bolsa</h3><div id="inventory-list"><p class="inventory-empty">Carregando itens...</p></div></section>
+      <section class="inventory-gear"><h3>Equipamentos</h3><div id="equipment-list"></div></section>
+    </div>
+    <p class="inventory-help">Pressione I ou Esc para fechar. Os itens e equipamentos são salvos na sua conta.</p>
   </section>
   <aside id="quest-panel" class="quest-panel" aria-label="Diário de missões">
     <h2>Diário de missões</h2>
