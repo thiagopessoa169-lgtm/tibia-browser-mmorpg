@@ -13,6 +13,7 @@
     lastPersistAt: 0,
     lastX: null,
     lastY: null,
+    mapId: "aetheria-village",
     progressSaveTimer: null,
     pendingProgress: null,
     progressSaving: false,
@@ -189,7 +190,8 @@
     state.lastY = y;
     state.lastPersistAt = 0;
     state.lastBroadcastAt = 0;
-    window.AetheriaWorld?.setLocalPosition?.(x, y);
+    state.mapId=character.map_id==="bosque-antigo"?"bosque-antigo":"aetheria-village";
+    window.AetheriaWorld?.loadMap?.(state.mapId,x,y);
     window.AetheriaWorld?.loadProgress?.({ level, hp, max_hp: maxHp, xp });
     $("player-name").textContent = character.name;
     $("player-level").textContent = "Nível " + level + " · Aventureiro";
@@ -275,7 +277,7 @@
     const players = [];
     Object.values(presence).forEach((entries) => {
       (entries || []).forEach((entry) => {
-        if (entry.user_id !== state.user?.id && entry.map_id === "aetheria-village") {
+        if (entry.user_id !== state.user?.id && entry.map_id === state.character?.map_id) {
           players.push(entry);
         }
       });
@@ -289,9 +291,8 @@
     const x = Math.round(Number(position.x));
     const y = Math.round(Number(position.y));
     if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
-    const { error } = await state.client.from("characters").update({
-      x, y, updated_at: new Date().toISOString()
-    }).eq("id", state.character.id).eq("user_id", state.user.id);
+    const mapId=state.character.map_id==="bosque-antigo"?"bosque-antigo":"aetheria-village";
+    const { error } = await state.client.from("characters").update({x,y,map_id:mapId,updated_at:new Date().toISOString()}).eq("id",state.character.id).eq("user_id",state.user.id);
     if (error) {
       console.warn("Falha ao salvar posição:", error.message);
       return false;
@@ -382,7 +383,7 @@
     state.lastBroadcastAt = now;
     state.lastX = x;
     state.lastY = y;
-    const payload = { user_id: state.user.id, character_id: state.character.id, name: state.character.name, x: Math.round(x), y: Math.round(y), map_id: "aetheria-village", sent_at: now };
+    const payload = { user_id: state.user.id, character_id: state.character.id, name: state.character.name, x: Math.round(x), y: Math.round(y), map_id: state.character.map_id || state.mapId, sent_at: now };
     try {
       const result = await state.channel.send({ type: "broadcast", event: "position", payload });
       if (result !== "ok" && result?.status !== "ok") console.warn("[Aetheria] Broadcast de posição não confirmado:", result);
@@ -394,6 +395,11 @@
       state.lastPersistAt = now;
       persistPosition(payload).catch((error) => console.warn("[Aetheria] Erro ao salvar posição:", error));
     }
+  }
+
+  async function changeMap(mapId,x,y){
+    if(!state.client||!state.character||!state.user)return {ok:false,message:"Entre no jogo para viajar."};const destination=mapId==="bosque-antigo"?"bosque-antigo":mapId==="aetheria-village"?"aetheria-village":null;const px=Math.round(Number(x)),py=Math.round(Number(y));if(!destination||!Number.isFinite(px)||!Number.isFinite(py)||px<16||px>2288||py<16||py>1520)return {ok:false,message:"Destino inválido."};
+    const {data,error}=await state.client.from("characters").update({map_id:destination,x:px,y:py,updated_at:new Date().toISOString()}).eq("id",state.character.id).eq("user_id",state.user.id).select("id,map_id,x,y").maybeSingle();if(error||!data)return {ok:false,message:"Não foi possível salvar a região: "+(error?.message||"personagem não encontrado.")};state.character={...state.character,map_id:destination,x:px,y:py};state.mapId=destination;state.lastX=px;state.lastY=py;state.lastPersistAt=Date.now();if(state.channel)await state.channel.track({user_id:state.user.id,character_id:state.character.id,name:state.character.name,x:px,y:py,map_id:destination});return {ok:true,map_id:destination};
   }
 
   async function attackPlayer(targetCharacterId) {
@@ -727,6 +733,7 @@
 
   window.AetheriaBackend = {
     sendPosition,
+    changeMap,
     saveCurrentPosition,
     saveProgress,
     flushProgress,
