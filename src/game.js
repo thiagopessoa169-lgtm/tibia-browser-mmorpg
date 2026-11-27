@@ -52,6 +52,8 @@ class WorldScene extends Phaser.Scene {
     this.add.text(18,18,"VILA DE AETHERIA",{fontFamily:"Georgia,serif",fontSize:"13px",color:"#e7e0b9",stroke:"#17251d",strokeThickness:4,letterSpacing:2}).setScrollFactor(0).setDepth(1000);
     this.add.text(18,39,"Uma nova jornada começa...",{fontFamily:"Arial",fontSize:"10px",color:"#c0d0b9",stroke:"#17251d",strokeThickness:3}).setScrollFactor(0).setDepth(1000);
     this.remotePlayers = new Map();
+    this.locationLabel = document.querySelector(".location-card strong");
+    this.wasInArena = false;
     window.AetheriaWorld = {
       setLocalPosition: (x, y) => {
         if (Number.isFinite(x) && Number.isFinite(y)) this.player.setPosition(
@@ -62,6 +64,7 @@ class WorldScene extends Phaser.Scene {
       getLocalPosition: () => ({ x: this.player.x, y: this.player.y }),
       updateRemotePlayer: (data) => this.updateRemotePlayer(data),
       syncRemotePlayers: (players) => this.syncRemotePlayers(players),
+      applyServerHp: (hp) => this.applyServerHp(hp),
       loadProgress: (progress) => {
         this.playerLevel = Math.max(1, Math.floor(Number(progress?.level) || 1));
         this.playerMaxHp = Math.max(1, Math.floor(Number(progress?.max_hp) || 100));
@@ -99,6 +102,14 @@ class WorldScene extends Phaser.Scene {
     props.forEach(([x,y,key])=>{const obj=this.add.image(x*TILE+16,y*TILE+16,key).setDepth(y*TILE+20);if(key==="house"||key==="rock")this.obstacles.add(obj);if(key==="tree"){const trunk=this.add.rectangle(x*TILE+16,y*TILE+24,9,12,0x4c3828).setDepth(y*TILE+1);this.obstacles.add(trunk);obj.setDepth(y*TILE+40)}});
     this.obstacles.refresh();
     this.add.graphics().lineStyle(8,0x2d4b37,.9).strokeRect(2,2,WORLD_W-4,WORLD_H-4).setDepth(WORLD_H+10);
+    const arenaX=31*TILE, arenaY=35*TILE, arenaW=12*TILE, arenaH=9*TILE;
+    const arena=this.add.graphics().setDepth(4);
+    arena.fillStyle(0x294b68,.34).fillRect(arenaX,arenaY,arenaW,arenaH);
+    arena.lineStyle(5,0xa7d5e8,.95).strokeRect(arenaX,arenaY,arenaW,arenaH);
+    this.add.text(arenaX+arenaW/2,arenaY+18,"ARENA DE AETHERIA",{
+      fontFamily:"Georgia,serif",fontSize:"16px",color:"#e2f4ff",
+      stroke:"#17334a",strokeThickness:5,letterSpacing:2
+    }).setOrigin(.5).setDepth(8);
   }
   createPlayer(){this.player=this.physics.add.sprite(36*TILE+16,24*TILE+16,"player");this.player.setDepth(this.player.y+30).setCollideWorldBounds(true);this.player.body.setSize(17,17).setOffset(7,12);this.player.speed=145}
   createVillagers(){
@@ -143,8 +154,39 @@ class WorldScene extends Phaser.Scene {
     monster.hpBar.setDepth(monster.y+49);
     monster.nameLabel.setPosition(monster.x,monster.y-27).setDepth(monster.y+50);
   }
+  isInArena(x,y){
+    return x>=31*TILE+16 && x<=42*TILE+16
+      && y>=35*TILE+16 && y<=43*TILE+16;
+  }
+  attackNearbyPlayer(time){
+    if(!this.isInArena(this.player.x,this.player.y)) return false;
+    let target=null,nearest=76;
+    for(const remote of this.remotePlayers.values()){
+      if(!remote.characterId || !this.isInArena(remote.targetX,remote.targetY)) continue;
+      const distance=Phaser.Math.Distance.Between(
+        this.player.x,this.player.y,remote.targetX,remote.targetY
+      );
+      if(distance<nearest){nearest=distance;target=remote;}
+    }
+    if(!target) return false;
+    this.attackCooldownAt=time+1100;
+    const pulse=this.add.circle(this.player.x,this.player.y,18,0xa7d5e8,.22)
+      .setStrokeStyle(2,0xe2f4ff,.95).setDepth(this.player.y+60);
+    this.tweens.add({targets:pulse,scale:2.1,alpha:0,duration:220,onComplete:()=>pulse.destroy()});
+    this.showCombatMessage("Duelo: validando ação...");
+    Promise.resolve(window.AetheriaBackend?.attackPlayer?.(target.characterId))
+      .then(result=>{
+        if(!this.scene.isActive()) return;
+        this.showCombatMessage(result?.ok
+          ? "Você atingiu "+result.target_name+"! (-"+result.damage+" HP)"
+          : (result?.message || "Não foi possível realizar o duelo."));
+      })
+      .catch(()=>this.showCombatMessage("Não foi possível conectar à arena."));
+    return true;
+  }
   attackNearbyMonster(time){
     if(!Phaser.Input.Keyboard.JustDown(this.keys.SPACE) || time<this.attackCooldownAt || this.playerRespawning) return;
+    if(this.attackNearbyPlayer(time)) return;
     this.attackCooldownAt=time+550;
     let target=null,nearest=62;
     this.monsters.getChildren().forEach(monster=>{
@@ -183,6 +225,15 @@ class WorldScene extends Phaser.Scene {
       level: this.playerLevel, hp: this.playerHp,
       max_hp: this.playerMaxHp, xp: this.playerXp
     }, { immediate: true });
+  }
+  applyServerHp(serverHp){
+    if(this.playerRespawning) return;
+    const nextHp=Phaser.Math.Clamp(Math.floor(Number(serverHp)),0,this.playerMaxHp);
+    if(!Number.isFinite(nextHp) || nextHp>=this.playerHp) return;
+    this.damagePlayer(this.playerHp-nextHp);
+    this.showCombatMessage(nextHp<=0
+      ? "Você foi derrotado na arena!"
+      : "Você recebeu dano na arena.");
   }
   damagePlayer(amount){
     if(this.playerRespawning) return;
@@ -278,7 +329,11 @@ class WorldScene extends Phaser.Scene {
         fontFamily:"Arial",fontSize:"10px",color:"#d8efff",
         stroke:"#142b3b",strokeThickness:3
       }).setOrigin(.5).setDepth(y+50);
-      remote = {sprite,label,targetX:x,targetY:y,lastUpdateAt:Number(data.sent_at)||0};
+      remote = {
+        sprite,label,targetX:x,targetY:y,
+        characterId:data.character_id || null,
+        lastUpdateAt:Number(data.sent_at)||0
+      };
       this.remotePlayers.set(data.user_id,remote);
     } else {
       const incomingAt = Number(data.sent_at) || 0;
@@ -286,6 +341,7 @@ class WorldScene extends Phaser.Scene {
       if (incomingAt && remote.lastUpdateAt && incomingAt < remote.lastUpdateAt) return;
       remote.targetX = x;
       remote.targetY = y;
+      remote.characterId = data.character_id || remote.characterId;
       if (incomingAt) remote.lastUpdateAt = incomingAt;
       remote.label.setText(String(data.name || "Aventureiro"));
     }
@@ -321,6 +377,14 @@ class WorldScene extends Phaser.Scene {
     const active=document.activeElement;
     const typing=active && (active.matches("input,textarea,select") || active.isContentEditable);
     if(typing || this.playerRespawning){this.player.setVelocity(0,0);return;}
+    const inArena=this.isInArena(this.player.x,this.player.y);
+    if(inArena!==this.wasInArena){
+      this.wasInArena=inArena;
+      if(this.locationLabel) this.locationLabel.textContent=inArena?"Arena de Aetheria":"Vila de Aetheria";
+      this.showCombatMessage(inArena
+        ? "Você entrou na arena. O duelo está liberado!"
+        : "Você saiu da arena. A vila é uma zona segura.");
+    }
     this.updateMonsters(time);
     this.attackNearbyMonster(time);
     const left=this.cursors.left.isDown||this.keys.A.isDown,right=this.cursors.right.isDown||this.keys.D.isDown,up=this.cursors.up.isDown||this.keys.W.isDown,down=this.cursors.down.isDown||this.keys.S.isDown;
