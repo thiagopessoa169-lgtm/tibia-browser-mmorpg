@@ -126,7 +126,7 @@ class WorldScene extends Phaser.Scene {
   }
   update(time, delta){
     // Suaviza a posição dos jogadores remotos sem alterar a movimentação local.
-    const blend = 1 - Math.exp(-Math.min(delta || 16.67, 50) / 75);
+    const blend = 1 - Math.exp(-Math.min(delta || 16.67, 50) / 125);
     for (const remote of this.remotePlayers.values()) {
       const currentX = remote.sprite.x;
       const currentY = remote.sprite.y;
