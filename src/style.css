@@ -40,3 +40,17 @@
 .npc-dialogue-close{width:30px;height:30px;border:1px solid #71866a;border-radius:7px;background:#263d31;color:#edf3e8;font-size:22px;line-height:1;cursor:pointer}
 .npc-dialogue-close:hover{background:#385441}
 @media(max-width:600px){.npc-dialogue{bottom:48px;padding:12px 13px}.npc-dialogue h2{font-size:15px}.npc-dialogue p{font-size:11px;line-height:1.5}}
+
+
+/* Etapa 4.2 — diário e ações de missão */
+.npc-quest-accept{margin:0 0 10px;padding:9px 14px;border:1px solid #a9c38a;border-radius:7px;background:#9eae79;color:#1c2b20;font-weight:700;cursor:pointer}
+.npc-quest-accept:disabled{opacity:.55;cursor:default}
+.quest-panel{position:absolute;z-index:8;top:78px;right:17px;width:min(260px,42%);max-height:220px;overflow:auto;padding:11px 13px;border:1px solid #82947b66;border-radius:10px;background:#14211ddd;box-shadow:0 5px 18px #0005;backdrop-filter:blur(5px);pointer-events:auto}
+.quest-panel h2{margin:0 0 8px;font:600 12px Georgia,serif;color:#eadcae}
+.quest-empty{margin:0;color:#b4c4b5;font-size:10px;line-height:1.5}
+.quest-entry{display:flex;flex-direction:column;gap:3px;padding:7px 0;border-top:1px solid #71866a55}
+.quest-entry strong{font-size:10px;color:#e8edda}
+.quest-entry span{font-size:9px;color:#c2d0bd}
+.quest-entry.is-completed span{color:#a9d89a}
+.quest-rewards{border-top:1px solid #71866a55;padding-top:7px;margin:6px 0 0;color:#d5dca9;font-size:9px;line-height:1.45}
+@media(max-width:600px){.quest-panel{top:78px;right:8px;width:43%;max-height:165px;padding:8px}.quest-panel h2{font-size:10px}.quest-entry{padding:5px 0}.quest-entry strong{font-size:9px}.quest-entry span,.quest-empty,.quest-rewards{font-size:8px}}
