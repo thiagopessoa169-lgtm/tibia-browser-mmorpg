@@ -1,6 +1,6 @@
 # Aetheria Online — MMORPG 2D para navegador
 
-Protótipo de MMORPG 2D top-down. A Etapa 1 trouxe a vila explorável e a movimentação. As Etapas 1, 2, 3.1, 3.2 e 3.3 foram aprovadas. A Etapa 4 está planejada e aguarda início de implementação.
+Protótipo de MMORPG 2D top-down. A Etapa 1 trouxe a vila explorável e a movimentação. As Etapas 1, 2, 3.1, 3.2 e 3.3 foram aprovadas. A Etapa 4 está em andamento: a subetapa 4.1 (NPCs e diálogos) foi publicada para validação.
 
 ## Executar
 
@@ -31,7 +31,7 @@ Siga o guia [Configurar o Supabase — Etapa 2](docs/ETAPA-2-SUPABASE.md). Sem U
 1. Base jogável no navegador (aprovada)
 2. Supabase Auth, personagens, PostgreSQL e Realtime (aprovada)
 3. Combate, monstros, XP e PvP (aprovada)
-4. NPCs, missões, inventário e expansão do mundo (planejada; implementação ainda não iniciada)
+4. NPCs, missões, inventário e expansão do mundo (4.1 publicada para validação)
 5. Polimento, performance e deploy
 
 A Etapa 2 foi validada com duas contas e movimentação multiplayer funcional. Consulte [o plano da Etapa 3](docs/ETAPA-3-PLANO.md) para escopo, decisões técnicas e critérios de aceitação.
