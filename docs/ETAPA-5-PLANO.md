@@ -1,7 +1,7 @@
 # Etapa 5 — Polimento visual, performance e deploy
 
 ## Status geral
-**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 5.1 foi autorizada e está em implementação. As subetapas seguintes dependem da validação da anterior.
+**Planejamento aprovado pelo usuário em 2026-11-27.** A subetapa 5.1 foi implementada, publicada e aprovada pelo usuário em 2026-11-27. As subetapas seguintes dependem da validação da anterior.
 
 ## Objetivo
 Refinar a apresentação e a experiência de Aetheria Online sem alterar regras de combate, progressão, inventário, missões, autenticação ou persistência já aprovadas.
@@ -14,22 +14,14 @@ Refinar a apresentação e a experiência de Aetheria Online sem alterar regras 
 - Não alterar regras de jogo nem dados persistidos nesta subetapa.
 
 ## 5.1 — Polimento visual
-**Status: em implementação; aguardando teste e aprovação do usuário.**
+**Status: aprovada pelo usuário em 2026-11-27.**
 
-Escopo:
-- Refinar paleta, contraste, profundidade, bordas e hierarquia visual.
-- Melhorar a apresentação de cabeçalho, cartões, HUD, diário, diálogos e inventário.
-- Adicionar estados consistentes de hover, foco visível e interação.
-- Ajustar detalhes responsivos para telas menores.
-- Respeitar a preferência do sistema por movimento reduzido.
-
-Critérios de aceitação:
-- [ ] A página e o jogo carregam sem erros.
-- [ ] Login, seleção de personagem e logout continuam funcionando.
-- [ ] HUD, diário, diálogos e inventário continuam legíveis e utilizáveis.
-- [ ] Os controles por teclado e os formulários continuam funcionando.
-- [ ] O layout permanece utilizável em desktop e celular.
-- [ ] Não há regressão em multiplayer, combate, missões, itens ou transições de região.
+Implementado e publicado:
+- Refinamento da paleta, contraste, profundidade, bordas e hierarquia visual.
+- Melhorias visuais no cabeçalho, cartões, HUD, diário de missões, diálogos e inventário.
+- Estados de interação e destaque visual mais perceptíveis.
+- Ajustes responsivos para telas menores.
+- Identificação visual da versão de polimento 5.1 no cabeçalho.
 
 ## Próximas subetapas — não iniciadas
 ### 5.2 — Performance e estabilidade
