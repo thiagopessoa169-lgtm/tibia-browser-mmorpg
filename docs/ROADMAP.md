@@ -35,7 +35,7 @@
 - [x] 6.1 Terceira região explorável (Ruínas de Elyndor) — aprovada.
 - [x] 6.2 Novos monstros e comportamento — aprovada.
 - [x] 6.3 Chefe regional — aprovado em 2026-11-28.
-- [ ] 6.4 Missões e NPCs da nova região — 6.4.1 (NPCs e diálogos) publicada para teste; 6.4.2 (missões) pendente.
+- [ ] 6.4 Missões e NPCs da nova região — 6.4.1 (NPCs e diálogos) aprovada; 6.4.2 (missões) pendente.
 - [ ] 6.5 Recompensas e equipamentos.
 - [ ] 6.6 Multiplayer e balanceamento dos desafios.
 
