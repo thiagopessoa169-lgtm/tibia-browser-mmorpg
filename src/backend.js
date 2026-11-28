@@ -415,7 +415,7 @@
 
   async function changeMap(mapId,x,y){
     if(!state.client||!state.character||!state.user)return {ok:false,message:"Entre no jogo para viajar."};const destination=["aetheria-village","bosque-antigo","ruinas-elyndor"].includes(mapId)?mapId:null;const px=Math.round(Number(x)),py=Math.round(Number(y));if(!destination||!Number.isFinite(px)||!Number.isFinite(py)||px<16||px>2288||py<16||py>1520)return {ok:false,message:"Destino inválido."};
-    const {data,error}=await state.client.from("characters").update({map_id:destination,x:px,y:py,updated_at:new Date().toISOString()}).eq("id",state.character.id).eq("user_id",state.user.id).select("id,map_id,x,y").maybeSingle();if(error||!data)return {ok:false,message:"Não foi possível salvar a região: "+(error?.message||"personagem não encontrado.")};state.character={...state.character,map_id:destination,x:px,y:py};state.mapId=destination;state.lastX=px;state.lastY=py;state.lastPersistAt=Date.now();if(state.channel)await state.channel.track({user_id:state.user.id,character_id:state.character.id,name:state.character.name,x:px,y:py,map_id:destination});return {ok:true,map_id:destination};
+    const {data,error}=await state.client.from("characters").update({map_id:destination,x:px,y:py,updated_at:new Date().toISOString()}).eq("id",state.character.id).eq("user_id",state.user.id).select("id,map_id,x,y").maybeSingle();if(error||!data)return {ok:false,message:"Não foi possível salvar a região: "+(error?.message||"personagem não encontrado.")};state.character={...state.character,map_id:destination,x:px,y:py};state.mapId=destination;state.lastX=px;state.lastY=py;state.lastPersistAt=Date.now();if(state.channel)await state.channel.track({user_id:state.user.id,character_id:state.character.id,name:state.character.name,x:px,y:py,map_id:destination});await loadQuests();return {ok:true,map_id:destination};
   }
 
   async function attackPlayer(targetCharacterId) {
@@ -505,7 +505,7 @@
     state.questData = result;
     renderQuestPanel(result);
     window.AetheriaWorld?.loadQuestData?.(result);
-    await loadInventory();
+    if (state.mapId === "aetheria-village") await loadInventory();
     return result;
   }
 
