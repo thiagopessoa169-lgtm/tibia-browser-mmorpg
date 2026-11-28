@@ -6,7 +6,7 @@ class WorldScene extends Phaser.Scene {
   create(data={}){
     this.mapId=["bosque-antigo","ruinas-elyndor"].includes(data.mapId)?data.mapId:"aetheria-village";
     this.mapTransitioning=false;
-    this.createTextures(); this.drawWorld(); this.createPlayer(); if(Number.isFinite(data.x)&&Number.isFinite(data.y))this.player.setPosition(data.x,data.y); this.createVillagers(); this.createHerbNodes(); this.createMonsters(); this.createPortals();
+    this.createTextures(); this.drawWorld(); this.createPlayer(); if(Number.isFinite(data.x)&&Number.isFinite(data.y))this.player.setPosition(data.x,data.y); this.createVillagers(); this.createHerbNodes(); this.createRuneNodes(); this.createMonsters(); this.createPortals();
     this.cameras.main.setBounds(0,0,WORLD_W,WORLD_H);
     this.cameras.main.startFollow(this.player,true,.085,.085); this.cameras.main.setZoom(1.25);
     this.cursors=this.input.keyboard.createCursorKeys();
@@ -169,8 +169,8 @@ class WorldScene extends Phaser.Scene {
   createVillagers(){
     this.villagers=this.physics.add.staticGroup();
     const characters=this.mapId==="ruinas-elyndor"?[
-      {x:32,y:20,name:"Selene",role:"Arqueóloga de Elyndor",dialogue:"Você chegou ao coração das Ruínas de Elyndor. Sou Selene, e estudo os símbolos que ainda brilham nestas pedras.\n\nOs cristais não são apenas decoração: eles registram a memória da antiga cidade. Se encontrar inscrições luminosas, observe-as com atenção.\n\nHá muito a descobrir sob estas colunas."},
-      {x:40,y:28,name:"Kael",role:"Explorador das Ruínas",dialogue:"Cuidado com os corredores de pedra. As Sentinelas despertam quando alguém se aproxima, e as Fagulhas Rúnicas são rápidas.\n\nO Guardião no centro da praça protege algo importante. Não se aproxime sem estar preparado.\n\nO portal ao oeste leva de volta ao Bosque Antigo."}
+      {x:32,y:20,name:"Selene",role:"Arqueóloga de Elyndor",questKey:"rune_research",dialogue:"Você chegou ao coração das Ruínas de Elyndor. Sou Selene, e estudo os símbolos que ainda brilham nestas pedras.\n\nPreciso que investigue três cristais rúnicos espalhados pela região. Aproxime-se deles e pressione E para registrar cada fragmento.\n\nTraga os registros para que eu possa decifrar a memória da cidade."},
+      {x:40,y:28,name:"Kael",role:"Explorador das Ruínas",questKey:"ruins_clearance",dialogue:"As Sentinelas de Pedra e as Fagulhas Rúnicas estão impedindo a exploração segura das ruínas.\n\nDerrote três criaturas desta região para reduzir a ameaça. O progresso será registrado quando o servidor confirmar cada vitória.\n\nO Guardião no centro da praça continua sendo o maior perigo."}
     ]:this.mapId==="bosque-antigo"?[{x:39,y:22,name:"Eldrin",role:"Guardião do Bosque",dialogue:"Poucos viajantes encontram o caminho até aqui.\n\nO Bosque Antigo guarda trilhas esquecidas e criaturas mais resistentes. Explore com cuidado e volte à vila pelo portal ao oeste."}]:[
       {x:33,y:22,name:"Mira",role:"Guia de Aetheria",questKey:"slime_hunt",dialogue:"Bem-vindo à Vila de Aetheria!\n\nOs Lodos da Floresta estão se aproximando das estradas. Você pode ajudar a vila derrotando três deles?\n\nAceite a missão para registrar seu progresso e receber uma recompensa."},
       {x:40,y:26,name:"Ferreiro",role:"Mestre das ferramentas",questKey:"herb_gathering",dialogue:"Saudações, aventureiro! Estou precisando de ervas silvestres para preparar suprimentos.\n\nEncontre e recolha três ervas espalhadas pela vila. Elas ficam marcadas no chão.\n\nAceite a tarefa para começar."},
@@ -211,10 +211,39 @@ class WorldScene extends Phaser.Scene {
       return {...data,x,y,sprite,label,hint,collected:false,collecting:false};
     });
   }
+  createRuneNodes(){
+    const nodes=this.mapId!=="ruinas-elyndor"?[]:[
+      {key:"rune_01",x:27,y:17},
+      {key:"rune_02",x:45,y:31},
+      {key:"rune_03",x:34,y:12}
+    ];
+    this.runeNodes=nodes.map((data)=>{
+      const x=data.x*TILE+16,y=data.y*TILE+16;
+      const sprite=this.add.image(x,y,"ruin-crystal").setScale(.62).setTint(0x8ce8df).setAlpha(.88).setDepth(y+22);
+      const label=this.add.text(x,y-20,"Fragmento rúnico",{
+        fontFamily:"Arial",fontSize:"9px",color:"#c9fff4",
+        stroke:"#263523",strokeThickness:3
+      }).setOrigin(.5).setDepth(y+50).setVisible(false);
+      const hint=this.add.text(x,y-34,"E · investigar",{
+        fontFamily:"Arial",fontSize:"9px",color:"#fff0b0",
+        stroke:"#263523",strokeThickness:3
+      }).setOrigin(.5).setDepth(y+51).setVisible(false);
+      return {...data,x,y,sprite,label,hint,collected:false,collecting:false};
+    });
+  }
   loadQuestData(data){
     const collected=new Set(data?.collected_nodes||[]);
     (this.herbNodes||[]).forEach((node)=>{
       if(collected.has(node.key)){
+        node.collected=true;
+        node.sprite.setVisible(false);
+        node.label.setVisible(false);
+        node.hint.setVisible(false);
+      }
+    });
+    const runes=new Set(data?.collected_runes||[]);
+    (this.runeNodes||[]).forEach((node)=>{
+      if(runes.has(node.key)){
         node.collected=true;
         node.sprite.setVisible(false);
         node.label.setVisible(false);
@@ -255,6 +284,44 @@ class WorldScene extends Phaser.Scene {
       this.showCombatMessage(result.completed_now
         ? "Missão concluída! Recompensa registrada."
         : "Erva coletada! Progresso salvo.");
+    }).catch(()=>{
+      node.collecting=false;
+      this.showCombatMessage("Não foi possível conectar ao diário.");
+    });
+    return true;
+  }
+  findNearbyRune(){
+    let nearest=null,distanceLimit=48;
+    (this.runeNodes||[]).forEach((node)=>{
+      if(node.collected||!node.sprite.active)return;
+      const distance=Phaser.Math.Distance.Between(this.player.x,this.player.y,node.x,node.y);
+      if(distance<distanceLimit){distanceLimit=distance;nearest=node;}
+    });
+    (this.runeNodes||[]).forEach((node)=>{
+      const visible=node===nearest&&!this.dialogueOpen;
+      if(node.label?.active)node.label.setVisible(visible);
+      if(node.hint?.active)node.hint.setVisible(visible);
+    });
+    return nearest;
+  }
+  interactWithRune(){
+    const node=this.findNearbyRune();
+    if(!node||node.collecting)return false;
+    node.collecting=true;
+    this.showCombatMessage("Investigando fragmento...");
+    Promise.resolve(window.AetheriaBackend?.collectRune?.(node.key)).then((result)=>{
+      node.collecting=false;
+      if(!result?.ok){
+        this.showCombatMessage(result?.message||"Não foi possível registrar o fragmento.");
+        return;
+      }
+      node.collected=true;
+      node.sprite.setVisible(false);
+      node.label.setVisible(false);
+      node.hint.setVisible(false);
+      this.showCombatMessage(result.completed_now
+        ? "Pesquisa concluída! Recompensa registrada."
+        : "Fragmento registrado! Progresso salvo.");
     }).catch(()=>{
       node.collecting=false;
       this.showCombatMessage("Não foi possível conectar ao diário.");
@@ -563,6 +630,9 @@ class WorldScene extends Phaser.Scene {
             if(tracked){
               return backend.recordSlimeDefeat?.(index,defeatPosition);
             }
+            if(regionId==="ruinas-elyndor"){
+              return backend.recordRuinsDefeat?.(index,defeatPosition);
+            }
           }else{
             this.showCombatMessage(result?.message||"Não foi possível confirmar a recompensa.");
           }
@@ -805,10 +875,11 @@ class WorldScene extends Phaser.Scene {
       }
       return;
     }
-    if(Phaser.Input.Keyboard.JustDown(this.keys.E)){if(this.findNearbyPortal()){this.transitionMap();return;}if(this.interactWithNpc())return;if(this.interactWithHerb())return;}
+    if(Phaser.Input.Keyboard.JustDown(this.keys.E)){if(this.findNearbyPortal()){this.transitionMap();return;}if(this.interactWithNpc())return;if(this.interactWithHerb())return;if(this.interactWithRune())return;}
     this.findNearbyPortal();
     this.findNearbyNpc();
     this.findNearbyHerb();
+    this.findNearbyRune();
     const inArena=this.isInArena(this.player.x,this.player.y);
     if(inArena!==this.wasInArena){
       this.wasInArena=inArena;
