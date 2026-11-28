@@ -45,7 +45,7 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - Testar ataque, esquiva, mudança de fase, derrota, recompensa em grupo, reconexão e reaparecimento antes de aprovar.
 
 ### 6.4 — Missões e NPCs da nova região
-**Em andamento — 6.4.1 publicada para teste; missões ainda não implementadas.**
+**Status: 6.4.1 (NPCs e diálogos) aprovada pelo usuário em 2026-11-28; 6.4.2 (missões regionais) pendente.**
 
 #### 6.4.1 — NPCs e diálogos
 - Selene, arqueóloga de Elyndor, e Kael, explorador das Ruínas, aparecem na praça e usam o sistema existente de interação (E), diálogo e pausa de movimento.
