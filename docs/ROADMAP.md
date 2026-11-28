@@ -36,7 +36,7 @@
 - [x] 6.2 Novos monstros e comportamento — aprovada.
 - [x] 6.3 Chefe regional — aprovado em 2026-11-28.
 - [ ] 6.4 Missões e NPCs da nova região — 6.4.1 aprovada; 6.4.2 (missões regionais) aprovada pelo usuário.
-- [ ] 6.5 Recompensas e equipamentos.
+- [ ] 6.5 Recompensas e equipamentos — implementada e publicada para teste..
 - [ ] 6.6 Multiplayer e balanceamento dos desafios.
 
 Consulte [o plano da Etapa 5](ETAPA-5-PLANO.md) para auditoria e limitações conhecidas, e [o plano da Etapa 6](ETAPA-6-PLANO.md) para o escopo da expansão.
