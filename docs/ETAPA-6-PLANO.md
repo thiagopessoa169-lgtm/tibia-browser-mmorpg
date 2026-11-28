@@ -69,9 +69,12 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - A bolsa continua limitada a 20 itens; recompensas de missão não são concluídas se não houver espaço suficiente.
 
 ### 6.6 — Multiplayer e balanceamento dos desafios
-- Testar exploração e combate cooperativo entre jogadores.
-- Ajustar vida, dano, frequência de surgimento e recompensas com base nos testes.
+**Status: em andamento; primeira melhoria de sincronização publicada e aguardando teste do usuário.**
+- [x] 6.6.1 — Proteção contra consultas simultâneas ao estado do Guardião: bloqueio de chamadas sobrepostas, tratamento de falhas e preservação da atualização compartilhada. Publicada na Vercel em 2026-11-28 (commit `ff5ffd5`).
+- Testar exploração e combate cooperativo entre jogadores em sessões e computadores diferentes.
+- Ajustar vida, dano, frequência de surgimento e recompensas com base nos testes, sem alterar números aprovados antes da validação.
 - Verificar presença, sincronização, troca de região e recuperação de desconexão.
+- Auditoria inicial: a vida do Guardião é compartilhada no servidor; os monstros comuns ainda têm HP e simulação local por cliente. A cooperação contra monstros comuns permanece uma limitação a avaliar nesta etapa.
 - Preservar a regra de PvP somente na arena.
 
 ## Critérios gerais de aceitação
