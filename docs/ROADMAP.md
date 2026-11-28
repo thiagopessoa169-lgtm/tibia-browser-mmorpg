@@ -37,6 +37,6 @@
 - [x] 6.3 Chefe regional — aprovado em 2026-11-28.
 - [ ] 6.4 Missões e NPCs da nova região — 6.4.1 aprovada; 6.4.2 (missões regionais) aprovada pelo usuário.
 - [x] 6.5 Recompensas e equipamentos — aprovada pelo usuário em 2026-11-28.
-- [ ] 6.6 Multiplayer e balanceamento dos desafios.
+- [ ] 6.6 Multiplayer e balanceamento dos desafios — em andamento; 6.6.1 (proteção contra consultas simultâneas ao estado do Guardião) publicada para teste.
 
 Consulte [o plano da Etapa 5](ETAPA-5-PLANO.md) para auditoria e limitações conhecidas, e [o plano da Etapa 6](ETAPA-6-PLANO.md) para o escopo da expansão.
