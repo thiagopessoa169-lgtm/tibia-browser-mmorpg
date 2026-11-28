@@ -10,8 +10,8 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 const QUESTS = {
   slime_hunt: { target: 3, xp: 40, item: "slime_essence", quantity: 1 },
   herb_gathering: { target: 3, xp: 30, item: "medicinal_herb", quantity: 2 },
-  rune_research: { target: 3, xp: 90, item: "medicinal_herb", quantity: 2 },
-  ruins_clearance: { target: 3, xp: 120, item: "slime_essence", quantity: 2 }
+  rune_research: { target: 3, xp: 90, item: "runic_mantle", quantity: 1 },
+  ruins_clearance: { target: 3, xp: 120, item: "stoneguard_boots", quantity: 1 }
 };
 const HERB_NODES: Record<string,{x:number;y:number}> = {
   herb_01:{x:27*32+16,y:19*32+16},
@@ -128,7 +128,7 @@ Deno.serve(async(req:Request)=>{
       return json({ok:false,message:"Aproxime-se do fragmento para investigá-lo."},409,origin);
     const result=await admin.rpc("apply_quest_event",{
       p_character_id:characterId,p_quest_key:"rune_research",p_event_key:"rune:"+nodeKey,
-      p_target:3,p_reward_xp:90,p_reward_item_key:"medicinal_herb",p_reward_item_qty:2
+      p_target:3,p_reward_xp:90,p_reward_item_key:QUESTS.rune_research.item,p_reward_item_qty:QUESTS.rune_research.quantity
     });
     if(result.error)return json({ok:false,message:"Não foi possível registrar o fragmento."},500,origin);
     return json({...result.data,action:"collect_rune"},200,origin);
@@ -162,7 +162,7 @@ Deno.serve(async(req:Request)=>{
     const result=await admin.rpc("apply_quest_event",{
       p_character_id:characterId,p_quest_key:"ruins_clearance",
       p_event_key:"ruins-monster:"+spawnIndex+":"+now,
-      p_target:3,p_reward_xp:120,p_reward_item_key:"slime_essence",p_reward_item_qty:2
+      p_target:3,p_reward_xp:QUESTS.ruins_clearance.xp,p_reward_item_key:QUESTS.ruins_clearance.item,p_reward_item_qty:QUESTS.ruins_clearance.quantity
     });
     if(result.error)return json({ok:false,message:"Não foi possível registrar a vitória."},500,origin);
     return json({...result.data,action:"record_ruins_defeat"},200,origin);
