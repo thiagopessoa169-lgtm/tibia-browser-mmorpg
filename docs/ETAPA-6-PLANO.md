@@ -51,11 +51,13 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - Selene, arqueóloga de Elyndor, e Kael, explorador das Ruínas, aparecem na praça e usam o sistema existente de interação (E), diálogo e pausa de movimento.
 - Diálogos contextualizam a história, os cristais, os perigos e o Guardião sem alterar os NPCs das regiões anteriores.
 
-#### 6.4.2 — Missões regionais (próxima)
-- Adicionar NPCs e diálogos próprios.
-- Criar objetivos de exploração, coleta e combate.
-- Registrar progresso e conclusão no servidor.
-- Integrar recompensas ao diário e inventário existentes.
+#### 6.4.2 — Missões regionais
+**Status: implementada e publicada para teste/aprovação do usuário.**
+- Selene oferece “Memórias de Elyndor”: investigar três fragmentos rúnicos (E, próximos aos cristais) e receber 90 XP + 2 Ervas Medicinais.
+- Kael oferece “Ameaça nas ruínas”: derrotar três criaturas das Ruínas e receber 120 XP + 2 Essências de Lodo.
+- Progresso, eventos únicos, cooldown por ponto de surgimento, conclusão e recompensas são validados pelo Edge Function e RPC no Supabase.
+- O diário mostra as duas novas missões; fragmentos já registrados permanecem coletados após sair/entrar novamente na região.
+- Recompensas respeitam o limite de 20 itens da bolsa; se estiver cheia, a última ação não conclui a missão nem perde o progresso.
 
 ### 6.5 — Recompensas e equipamentos
 - Adicionar itens, materiais e equipamentos temáticos.
