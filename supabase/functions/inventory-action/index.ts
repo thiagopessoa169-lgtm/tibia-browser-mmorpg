@@ -72,7 +72,7 @@ Deno.serve(async (req: Request) => {
     .maybeSingle();
 
   if (characterError) return json({ ok: false, message: "Não foi possível validar o personagem." }, 500, origin);
-  if (!character || character.map_id !== "aetheria-village" || Number(character.hp) <= 0) {
+  if (!character || !["aetheria-village","bosque-antigo","ruinas-elyndor"].includes(character.map_id) || Number(character.hp) <= 0) {
     return json({ ok: false, message: "Personagem indisponível para esta ação." }, 403, origin);
   }
 
@@ -82,7 +82,7 @@ Deno.serve(async (req: Request) => {
   if (!["list", "use", "equip", "unequip"].includes(action)) {
     return json({ ok: false, message: "Ação de inventário desconhecida." }, 400, origin);
   }
-  if (itemKey && !["medicinal_herb", "slime_essence", "traveler_tunic", "trail_boots", "copper_charm"].includes(itemKey)) {
+  if (itemKey && !["medicinal_herb", "slime_essence", "traveler_tunic", "trail_boots", "copper_charm", "rune_crystal", "guardian_core", "runic_mantle", "stoneguard_boots", "elyndor_sigil"].includes(itemKey)) {
     return json({ ok: false, message: "Item inválido." }, 400, origin);
   }
   if (slot && !["body", "feet", "amulet"].includes(slot)) {
