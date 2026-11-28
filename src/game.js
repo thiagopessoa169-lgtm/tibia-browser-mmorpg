@@ -427,7 +427,7 @@ class WorldScene extends Phaser.Scene {
   }
   createRegionalBoss(){
     const x=36*TILE+16,y=24*TILE+16;
-    this.regionalBoss={x,y,hp:2400,maxHp:2400,phase:1,defeated:false,nextAttackAt:0,attackPending:false,syncAt:0};
+    this.regionalBoss={x,y,hp:2400,maxHp:2400,phase:1,defeated:false,nextAttackAt:0,attackPending:false,syncAt:0,syncInFlight:false};
     const boss=this.add.image(x,y,"elyndor-guardian").setScale(1.55).setDepth(y+35);
     boss.setTint(0xc5d6ce);
     this.regionalBoss.sprite=boss;
@@ -453,19 +453,28 @@ class WorldScene extends Phaser.Scene {
     if(boss.defeated){boss.telegraph?.setVisible(false);boss.attackPending=false;}
   }
   async syncRegionalBoss(){
-    const boss=this.regionalBoss;if(!boss||!this.scene.isActive())return;
+    const boss=this.regionalBoss;
+    if(!boss||!this.scene.isActive()||boss.syncInFlight)return;
     const backend=window.AetheriaBackend;
     if(!backend?.hasOnlineCharacter?.())return;
-    const result=await backend.getRegionalBossState?.();
-    if(!this.scene.isActive()||!result?.ok||!result.boss)return;
-    const state=result.boss;
-    boss.hp=Number(state.hp)||0;boss.maxHp=Number(state.max_hp)||2400;
-    boss.phase=Number(state.phase)||1;boss.defeated=Boolean(state.defeated);
-    this.drawRegionalBossBar();
-    if(state.defeated&&boss.lastDefeatedNotice!==true){
-      boss.lastDefeatedNotice=true;
-      this.showCombatMessage("O Guardião foi derrotado! Retornará em breve.");
-    }else if(!state.defeated)boss.lastDefeatedNotice=false;
+    // Evita consultas simultâneas quando a resposta do servidor demora mais que o intervalo.
+    boss.syncInFlight=true;
+    try{
+      const result=await backend.getRegionalBossState?.();
+      if(!this.scene.isActive()||this.regionalBoss!==boss||!result?.ok||!result.boss)return;
+      const state=result.boss;
+      boss.hp=Number(state.hp)||0;boss.maxHp=Number(state.max_hp)||2400;
+      boss.phase=Number(state.phase)||1;boss.defeated=Boolean(state.defeated);
+      this.drawRegionalBossBar();
+      if(state.defeated&&boss.lastDefeatedNotice!==true){
+        boss.lastDefeatedNotice=true;
+        this.showCombatMessage("O Guardião foi derrotado! Retornará em breve.");
+      }else if(!state.defeated)boss.lastDefeatedNotice=false;
+    }catch(error){
+      console.warn("[Aetheria] Não foi possível sincronizar o Guardião:",error);
+    }finally{
+      boss.syncInFlight=false;
+    }
   }
   attackRegionalBoss(time){
     const boss=this.regionalBoss;
