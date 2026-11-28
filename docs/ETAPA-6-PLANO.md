@@ -60,7 +60,7 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - Recompensas respeitam o limite de 20 itens da bolsa; se estiver cheia, a última ação não conclui a missão nem perde o progresso.
 
 ### 6.5 — Recompensas e equipamentos
-**Status: implementada; publicação Vercel pendente por limite diário de deploys.**
+**Status: aprovada pelo usuário em 2026-11-28, após correções e teste do Manto Rúnico.**
 - Novos itens: Cristal Rúnico e Núcleo do Guardião (materiais); Manto Rúnico (corpo); Botas do Guardião (pés); Selo de Elyndor (amuleto).
 - Selene recompensa a pesquisa dos fragmentos com 90 XP, Manto Rúnico e 3 Cristais Rúnicos.
 - Kael recompensa a limpeza das ruínas com 120 XP, Botas do Guardião e 1 Núcleo do Guardião.
