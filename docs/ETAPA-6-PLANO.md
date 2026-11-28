@@ -60,10 +60,13 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - Recompensas respeitam o limite de 20 itens da bolsa; se estiver cheia, a última ação não conclui a missão nem perde o progresso.
 
 ### 6.5 — Recompensas e equipamentos
-- Adicionar itens, materiais e equipamentos temáticos.
-- Integrar itens ao inventário, slots e ações já existentes.
-- Validar concessão, consumo e equipamento no servidor.
-- Garantir persistência após logout/login.
+**Status: implementada e publicada para teste/aprovação do usuário.**
+- Novos itens: Cristal Rúnico e Núcleo do Guardião (materiais); Manto Rúnico (corpo); Botas do Guardião (pés); Selo de Elyndor (amuleto).
+- Selene recompensa a pesquisa dos fragmentos com 90 XP, Manto Rúnico e 3 Cristais Rúnicos.
+- Kael recompensa a limpeza das ruínas com 120 XP, Botas do Guardião e 1 Núcleo do Guardião.
+- Cada participante elegível do chefe recebe 220 XP e o Selo de Elyndor quando houver espaço na bolsa.
+- Os novos equipamentos usam os slots existentes; inventário, troca de equipamento, bolsa e recompensas são persistidos e validados no servidor.
+- A bolsa continua limitada a 20 itens; recompensas de missão não são concluídas se não houver espaço suficiente.
 
 ### 6.6 — Multiplayer e balanceamento dos desafios
 - Testar exploração e combate cooperativo entre jogadores.
