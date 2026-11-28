@@ -460,13 +460,15 @@
     list.replaceChildren();
     const labels = {
       slime_hunt: "Limpeza da estrada",
-      herb_gathering: "Ervas para a oficina"
+      herb_gathering: "Ervas para a oficina",
+      rune_research: "Memórias de Elyndor",
+      ruins_clearance: "Ameaça nas ruínas"
     };
     const quests = Array.isArray(data?.quests) ? data.quests : [];
     if (!quests.length) {
       const empty = document.createElement("p");
       empty.className = "quest-empty";
-      empty.textContent = "Converse com Mira ou com o Ferreiro para receber sua primeira missão.";
+      empty.textContent = "Converse com os habitantes das regiões para receber missões.";
       list.append(empty);
     } else {
       quests.forEach((quest) => {
@@ -520,6 +522,30 @@
     }
     const result = await invokeQuestAction("collect_herb", { node_key: nodeKey });
     if (result?.ok) await loadQuests();
+    return result;
+  }
+
+  async function collectRune(nodeKey) {
+    const position = currentPosition();
+    if (!position || !(await persistPosition(position))) {
+      return { ok: false, message: "Não foi possível atualizar sua posição. Tente novamente." };
+    }
+    const result = await invokeQuestAction("collect_rune", { node_key: nodeKey });
+    if (result?.ok) await loadQuests();
+    return result;
+  }
+
+  async function recordRuinsDefeat(spawnIndex, defeatPosition) {
+    const position = currentPosition();
+    if (!position || !(await persistPosition(position))) {
+      return { ok: false, message: "Não foi possível atualizar sua posição. Tente novamente." };
+    }
+    const result = await invokeQuestAction("record_ruins_defeat", {
+      spawn_index: spawnIndex,
+      defeat_x: Number(defeatPosition?.x),
+      defeat_y: Number(defeatPosition?.y)
+    });
+    if (result?.ok && result.tracked !== false) await loadQuests();
     return result;
   }
 
@@ -759,6 +785,8 @@
     loadQuests,
     acceptQuest,
     collectHerb,
+    collectRune,
+    recordRuinsDefeat,
     recordSlimeDefeat,
     getQuestState,
     openInventory,
