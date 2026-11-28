@@ -533,6 +533,7 @@
     }
     const result = await invokeQuestAction("collect_rune", { node_key: nodeKey });
     if (result?.ok) await loadQuests();
+    if (result?.ok && result.completed_now) await loadInventory();
     return result;
   }
 
@@ -547,6 +548,7 @@
       defeat_y: Number(defeatPosition?.y)
     });
     if (result?.ok && result.tracked !== false) await loadQuests();
+    if (result?.ok && result.completed_now) await loadInventory();
     return result;
   }
 
