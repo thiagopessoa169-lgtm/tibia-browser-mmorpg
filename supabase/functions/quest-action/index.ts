@@ -85,14 +85,14 @@ Deno.serve(async(req:Request)=>{
     return json({ok:false,message:"Esta ação só está disponível na Vila de Aetheria."},403,origin);
   }
   if(action==="list"){
-    const [quests,items,events]=await Promise.all([
+    const [quests,items,events,runes]=await Promise.all([
       admin.from("character_quests").select("quest_key,status,progress,target,accepted_at,completed_at").eq("character_id",characterId),
       admin.from("character_inventory").select("item_key,quantity").eq("character_id",characterId).in("item_key",["medicinal_herb","slime_essence"]),
       admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","herb:%"),
       admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","rune:%")
     ]);
-    if(quests.error||items.error||events.error)return json({ok:false,message:"Não foi possível carregar o diário."},500,origin);
-    return json({ok:true,quests:quests.data??[],items:items.data??[],collected_nodes:(events.data??[]).map((e:any)=>e.event_key.slice(5)),collected_runes:(await admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","rune:%")).data?.map((e:any)=>e.event_key.slice(5))??[]},200,origin);
+    if(quests.error||items.error||events.error||runes.error)return json({ok:false,message:"Não foi possível carregar o diário."},500,origin);
+    return json({ok:true,quests:quests.data??[],items:items.data??[],collected_nodes:(events.data??[]).map((e:any)=>e.event_key.slice(5)),collected_runes:(runes.data??[]).map((e:any)=>e.event_key.slice(5))},200,origin);
   }
   if(action==="accept"){
     const key=String(body.quest_key??"");
