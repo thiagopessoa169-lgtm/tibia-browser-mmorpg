@@ -9,13 +9,26 @@ const allowedOrigins = new Set(["https://tibia-browser-mmorpg.vercel.app","http:
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const QUESTS = {
   slime_hunt: { target: 3, xp: 40, item: "slime_essence", quantity: 1 },
-  herb_gathering: { target: 3, xp: 30, item: "medicinal_herb", quantity: 2 }
+  herb_gathering: { target: 3, xp: 30, item: "medicinal_herb", quantity: 2 },
+  rune_research: { target: 3, xp: 90, item: "medicinal_herb", quantity: 2 },
+  ruins_clearance: { target: 3, xp: 120, item: "slime_essence", quantity: 2 }
 };
 const HERB_NODES: Record<string,{x:number;y:number}> = {
   herb_01:{x:27*32+16,y:19*32+16},
   herb_02:{x:45*32+16,y:20*32+16},
   herb_03:{x:25*32+16,y:32*32+16}
 };
+const RUNE_NODES: Record<string,{x:number;y:number}> = {
+  rune_01:{x:27*32+16,y:17*32+16},
+  rune_02:{x:45*32+16,y:31*32+16},
+  rune_03:{x:34*32+16,y:12*32+16}
+};
+const RUINS_SPAWNS = [
+  {x:25*32+16,y:16*32+16},
+  {x:47*32+16,y:17*32+16},
+  {x:25*32+16,y:32*32+16},
+  {x:47*32+16,y:31*32+16}
+];
 const SLIME_SPAWNS = [
   {x:24*32+16,y:13*32+16},
   {x:48*32+16,y:14*32+16},
@@ -53,17 +66,33 @@ Deno.serve(async(req:Request)=>{
     .select("id,user_id,x,y,hp,map_id,level,xp,max_hp")
     .eq("id",characterId).eq("user_id",authData.user.id).maybeSingle();
   if(characterError)return json({ok:false,message:"Não foi possível validar o personagem."},500,origin);
-  if(!character||character.map_id!=="aetheria-village"||Number(character.hp)<=0)
+  if(!character||Number(character.hp)<=0)
     return json({ok:false,message:"Personagem indisponível para esta ação."},403,origin);
   const action=String(body.action??"");
+  if(action==="list"){
+    if(!["aetheria-village","bosque-antigo","ruinas-elyndor"].includes(character.map_id))
+      return json({ok:false,message:"Região indisponível."},403,origin);
+  }else if(["accept","collect_rune","record_ruins_defeat"].includes(action)){
+    const key=String(body.quest_key??"");
+    if(action==="accept"){
+      const requiredMap=key==="rune_research"||key==="ruins_clearance"?"ruinas-elyndor":"aetheria-village";
+      if(character.map_id!==requiredMap)
+        return json({ok:false,message:"Esta missão só pode ser iniciada na região correspondente."},403,origin);
+    }else if(character.map_id!=="ruinas-elyndor"){
+      return json({ok:false,message:"Esta ação só está disponível nas Ruínas de Elyndor."},403,origin);
+    }
+  }else if(character.map_id!=="aetheria-village"){
+    return json({ok:false,message:"Esta ação só está disponível na Vila de Aetheria."},403,origin);
+  }
   if(action==="list"){
     const [quests,items,events]=await Promise.all([
       admin.from("character_quests").select("quest_key,status,progress,target,accepted_at,completed_at").eq("character_id",characterId),
       admin.from("character_inventory").select("item_key,quantity").eq("character_id",characterId).in("item_key",["medicinal_herb","slime_essence"]),
-      admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","herb:%")
+      admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","herb:%"),
+      admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","rune:%")
     ]);
     if(quests.error||items.error||events.error)return json({ok:false,message:"Não foi possível carregar o diário."},500,origin);
-    return json({ok:true,quests:quests.data??[],items:items.data??[],collected_nodes:(events.data??[]).map((e:any)=>e.event_key.slice(5))},200,origin);
+    return json({ok:true,quests:quests.data??[],items:items.data??[],collected_nodes:(events.data??[]).map((e:any)=>e.event_key.slice(5)),collected_runes:(await admin.from("quest_event_log").select("event_key").eq("character_id",characterId).like("event_key","rune:%")).data?.map((e:any)=>e.event_key.slice(5))??[]},200,origin);
   }
   if(action==="accept"){
     const key=String(body.quest_key??"");
@@ -90,6 +119,53 @@ Deno.serve(async(req:Request)=>{
     });
     if(result.error)return json({ok:false,message:"Não foi possível registrar a coleta."},500,origin);
     return json({...result.data,action:"collect_herb"},200,origin);
+  }
+  if(action==="collect_rune"){
+    const nodeKey=String(body.node_key??"");
+    const node=RUNE_NODES[nodeKey];
+    if(!node)return json({ok:false,message:"Fragmento rúnico inválido."},400,origin);
+    if(!near(Number(character.x),Number(character.y),node,76))
+      return json({ok:false,message:"Aproxime-se do fragmento para investigá-lo."},409,origin);
+    const result=await admin.rpc("apply_quest_event",{
+      p_character_id:characterId,p_quest_key:"rune_research",p_event_key:"rune:"+nodeKey,
+      p_target:3,p_reward_xp:90,p_reward_item_key:"medicinal_herb",p_reward_item_qty:2
+    });
+    if(result.error)return json({ok:false,message:"Não foi possível registrar o fragmento."},500,origin);
+    return json({...result.data,action:"collect_rune"},200,origin);
+  }
+  if(action==="record_ruins_defeat"){
+    const spawnIndex=Number(body.spawn_index);
+    if(!Number.isInteger(spawnIndex)||spawnIndex<0||spawnIndex>=RUINS_SPAWNS.length)
+      return json({ok:false,message:"Criatura inválida."},400,origin);
+    const defeatX=Number(body.defeat_x),defeatY=Number(body.defeat_y);
+    if(!Number.isFinite(defeatX)||!Number.isFinite(defeatY))
+      return json({ok:false,message:"Local da vitória inválido."},400,origin);
+    if(!near(Number(character.x),Number(character.y),{x:defeatX,y:defeatY},112))
+      return json({ok:false,message:"A posição do personagem ainda não foi sincronizada."},409,origin);
+    if(!near(defeatX,defeatY,RUINS_SPAWNS[spawnIndex],360))
+      return json({ok:false,message:"A criatura está fora da área de surgimento."},409,origin);
+    const {data:activeQuest,error:questError}=await admin.from("character_quests")
+      .select("quest_key").eq("character_id",characterId).eq("quest_key","ruins_clearance").eq("status","active").maybeSingle();
+    if(questError)return json({ok:false,message:"Não foi possível validar a missão."},500,origin);
+    if(!activeQuest)return json({ok:true,tracked:false,message:"Nenhuma missão de combate ativa."},200,origin);
+    const now=new Date().toISOString();
+    const cutoff=new Date(Date.now()-7000).toISOString();
+    const seed=await admin.from("ruins_quest_cooldowns").upsert({
+      character_id:characterId,spawn_index:spawnIndex,last_defeated_at:"1970-01-01T00:00:00.000Z"
+    },{onConflict:"character_id,spawn_index",ignoreDuplicates:true});
+    if(seed.error)return json({ok:false,message:"Não foi possível validar o surgimento."},500,origin);
+    const cooldown=await admin.from("ruins_quest_cooldowns").update({last_defeated_at:now})
+      .eq("character_id",characterId).eq("spawn_index",spawnIndex).lte("last_defeated_at",cutoff)
+      .select("spawn_index").maybeSingle();
+    if(cooldown.error)return json({ok:false,message:"Não foi possível validar o intervalo."},500,origin);
+    if(!cooldown.data)return json({ok:false,message:"Aguarde o próximo surgimento dessa criatura."},429,origin);
+    const result=await admin.rpc("apply_quest_event",{
+      p_character_id:characterId,p_quest_key:"ruins_clearance",
+      p_event_key:"ruins-monster:"+spawnIndex+":"+now,
+      p_target:3,p_reward_xp:120,p_reward_item_key:"slime_essence",p_reward_item_qty:2
+    });
+    if(result.error)return json({ok:false,message:"Não foi possível registrar a vitória."},500,origin);
+    return json({...result.data,action:"record_ruins_defeat"},200,origin);
   }
   if(action==="record_slime_defeat"){
     const spawnIndex=Number(body.spawn_index);
