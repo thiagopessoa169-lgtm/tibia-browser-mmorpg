@@ -52,7 +52,7 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - Diálogos contextualizam a história, os cristais, os perigos e o Guardião sem alterar os NPCs das regiões anteriores.
 
 #### 6.4.2 — Missões regionais
-**Status: implementada e publicada para teste/aprovação do usuário.**
+**Status: aprovada pelo usuário em 27/11/2026.**
 - Selene oferece “Memórias de Elyndor”: investigar três fragmentos rúnicos (E, próximos aos cristais) e receber 90 XP + 2 Ervas Medicinais.
 - Kael oferece “Ameaça nas ruínas”: derrotar três criaturas das Ruínas e receber 120 XP + 2 Essências de Lodo.
 - Progresso, eventos únicos, cooldown por ponto de surgimento, conclusão e recompensas são validados pelo Edge Function e RPC no Supabase.
