@@ -45,6 +45,13 @@ Ampliar Aetheria Online com uma terceira região explorável, novos monstros, um
 - Testar ataque, esquiva, mudança de fase, derrota, recompensa em grupo, reconexão e reaparecimento antes de aprovar.
 
 ### 6.4 — Missões e NPCs da nova região
+**Em andamento — 6.4.1 publicada para teste; missões ainda não implementadas.**
+
+#### 6.4.1 — NPCs e diálogos
+- Selene, arqueóloga de Elyndor, e Kael, explorador das Ruínas, aparecem na praça e usam o sistema existente de interação (E), diálogo e pausa de movimento.
+- Diálogos contextualizam a história, os cristais, os perigos e o Guardião sem alterar os NPCs das regiões anteriores.
+
+#### 6.4.2 — Missões regionais (próxima)
 - Adicionar NPCs e diálogos próprios.
 - Criar objetivos de exploração, coleta e combate.
 - Registrar progresso e conclusão no servidor.
