@@ -366,6 +366,7 @@
     if(!position || !(await persistPosition(position))) return {ok:false,message:"Não foi possível validar sua posição."};
     const result=await invokeProgressAction("boss_hit");
     if(result?.ok && result.character) window.AetheriaWorld?.loadProgress?.(result.character);
+    if(result?.ok && Number(result.reward_item_qty)>0) await loadInventory();
     return result;
   }
 
@@ -569,7 +570,12 @@
     slime_essence: { name: "Essência de lodo", type: "Material", description: "Material coletado dos Lodos da Floresta." },
     traveler_tunic: { name: "Túnica do viajante", type: "Equipamento · Corpo", description: "Uma túnica simples para a jornada.", action: "equip", actionLabel: "Equipar" },
     trail_boots: { name: "Botas de trilha", type: "Equipamento · Pés", description: "Botas resistentes para explorar Aetheria.", action: "equip", actionLabel: "Equipar" },
-    copper_charm: { name: "Amuleto de cobre", type: "Equipamento · Amuleto", description: "Um amuleto simples para completar seu equipamento.", action: "equip", actionLabel: "Equipar" }
+    copper_charm: { name: "Amuleto de cobre", type: "Equipamento · Amuleto", description: "Um amuleto simples para completar seu equipamento.", action: "equip", actionLabel: "Equipar" },
+    rune_crystal: { name: "Cristal rúnico", type: "Material", description: "Fragmento estabilizado da antiga cidade." },
+    guardian_core: { name: "Núcleo do Guardião", type: "Material", description: "Núcleo mineral recuperado das criaturas das ruínas." },
+    runic_mantle: { name: "Manto rúnico", type: "Equipamento · Corpo", description: "Manto tecido com símbolos antigos de Elyndor.", action: "equip", actionLabel: "Equipar" },
+    stoneguard_boots: { name: "Botas do Guardião", type: "Equipamento · Pés", description: "Botas reforçadas com placas de pedra rúnica.", action: "equip", actionLabel: "Equipar" },
+    elyndor_sigil: { name: "Selo de Elyndor", type: "Equipamento · Amuleto", description: "Selo antigo concedido após a queda do Guardião.", action: "equip", actionLabel: "Equipar" }
   };
   const EQUIPMENT_SLOTS = [
     { key: "body", label: "Corpo" },
